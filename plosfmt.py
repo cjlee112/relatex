@@ -11,7 +11,28 @@ def fmt_equations(t):
     t = re.sub(r'\\end{gather}', r'\\]', t)
     return t
 
-def extract_figures(t):
+def extract_legend(t):
+    'extract caption following PLOS production figure legend standard'
+    t = re.sub(r'\[htbp\]', '[!ht]', t)
+    t = re.sub(r'\\centering', '', t)
+    t = re.sub(r'\\includegraphics([^{]*){([^}]+)}', '', t) # rm image
+    t = re.sub(r'{\\small', '', t)
+    t = re.sub(r'}\\end', '}\n' + r'\\end', t)
+    t = re.sub('\n\n', '\n', t) # caption cannot contain multiple paragraphs
+    first = True
+    while True: # get rid of emphasis
+        i = t.find(r'\emph{')
+        if i < 0: # done
+            break
+        j = t.index('}', i)
+        if first: # PLOS wants first sentence in bold
+            t = t[:i] + r'{\bf ' + t[i + 6:j] + '.' + t[j + 1:]
+            first = False
+        else:
+            t = t[:i] + t[i + 6:j] + t[j + 1:]
+    return t + '\n\n'
+
+def extract_figures(t, legendsOnly=True):
     'remove figures from text; PLoS wants them inserted at the end'
     t = re.sub(r'\\hypertarget{([^}]+)}{}', '', t)
     #t = re.sub(r'\\includegraphics', r'\\includegraphics[width=5in]', t)
@@ -24,11 +45,14 @@ def extract_figures(t):
             if start < 0:
                 return t, figures # end of figures!!
         elif start < 0 or i < start: # extract normal figure block
-            j = t[i:].find(r'\end{figure}') + 12
-            figures += t[i:i + 14] + '[H]' + t[i + 20:i + j] + '\n'
+            j = t[i:].index(r'\end{figure}') + 12
+            if legendsOnly:
+                figures += extract_legend(t[i:i + j])
+            else:
+                figures += t[i:i + 14] + '[H]' + t[i + 20:i + j] + '\n'
             t = t[:i] + t[i + j:]
             continue
-        j = t[start:].find('}') + 1 # extract bare includegraphics
+        j = t[start:].index('}') + 1 # extract bare includegraphics
         figures += t[start:start + j] + '\n'
         t = t[:start] + t[start + j:]
     
