@@ -66,7 +66,7 @@
 % Title must be 150 characters or less
 \begin{flushleft}
 {\Large
-\textbf{Title}
+\textbf{ {{ title }} }
 }
 % Insert Author names, affiliations and corresponding author email.
 \\
@@ -95,6 +95,7 @@ $\ast$ E-mail: Corresponding leec@chem.ucla.edu
 
 % Please keep the abstract between 250 and 300 words
 \section*{Abstract}
+{{ section['Abstract'] }}
 
 % Please keep the Author Summary between 150 and 200 words
 % Use first person. PLoS ONE authors please skip this step. 
@@ -102,28 +103,33 @@ $\ast$ E-mail: Corresponding leec@chem.ucla.edu
 % \section*{Author Summary}
 
 \section*{Introduction}
+{{ section['Introduction'] }}
 
 % Results and Discussion can be combined.
 \section*{Results}
+{{ section['Results'] }}
 
 
 \section*{Discussion}
+{{ section['Discussion'] }}
 
 % You may title this section "Methods" or "Models". 
 % "Models" is not a valid title for PLoS ONE authors. However, PLoS ONE
 % authors may use "Analysis" 
 \section*{Materials and Methods}
+{{ section['Materials and Methods'] }}
 
 % Do NOT remove this, even if you are not including acknowledgments
 \section*{Acknowledgments}
-
+{{ section['Acknowledgments'] }}
 
 %\section*{References}
 % The bibtex filename
-\bibliography{template}
+\bibliography{ {{- bibname -}} }
 
 \newpage
 \section*{Figure Legends}
+{{ figures }}
 %\begin{figure}[!ht]
 %\begin{center}
 %%\includegraphics[width=4in]{figure_name.2.eps}
@@ -139,6 +145,7 @@ $\ast$ E-mail: Corresponding leec@chem.ucla.edu
 
 \newpage
 \section*{Tables}
+{{ tables }}
 %\begin{table}[!ht]
 %\caption{
 %\bf{Table title}}

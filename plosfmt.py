@@ -1,4 +1,4 @@
-
+from jinja2 import Template
 import re
 
 def fmt_equations(t):
@@ -131,15 +131,11 @@ def template_fmt(template, title, bibname, text, tables, figures,
                            'Discussion', 'Materials and Methods',
                            'Acknowledgments')):
     'insert our paper sections into the PLoS latex template'
-    t = append_after_tag(r'\textbf{Title', template, title, 5)
+    section = {}
     for tag in sections:
-        tag = '{' + tag + '}'
-        sectionText = get_section(text, tag)
-        t = append_after_tag(tag, t, sectionText)
-    t = append_after_tag(r'\bibliography{template', t, bibname, 8)
-    t = append_after_tag(r'\section*{Figure Legends}', t, '\n' + figures)
-    t = append_after_tag(r'\section*{Tables}', t, '\n' + tables)
-    return t
+        section[tag] = get_section(text, '{' + tag + '}')
+    return template.render(title=title, section=section, bibname=bibname,
+                           figures=figures, tables=tables)
 
 def reformat_file(paperpath, outpath='plosout.tex',
                   templatepath='plos_template_cjl.tex'):
@@ -148,7 +144,7 @@ def reformat_file(paperpath, outpath='plosout.tex',
     latex = ifile.read()
     ifile.close()
     ifile = open(templatepath) # read latex template from PLoS
-    template = ifile.read()
+    template = Template(ifile.read())
     ifile.close()
 
     title = get_title(latex) # extract relevant sections from sphinx
