@@ -59,7 +59,7 @@ def extract_figures(t, legendsOnly=True):
 
 def cleanup_tables(t):
     t = re.sub('threeparttable', 'table', t) # replace with standard table
-    t = re.sub(r'\\begin{table}', r'\\begin{table}[H]', t)
+    t = re.sub(r'\\begin{table}', r'\\begin{table}[!ht]', t)
     lastpos = 0
     s = '' # replace non-standard tabulary env with standard tabular env
     for m in re.finditer(r'\\begin{tabulary}{\\textwidth}{([^}]+)', t):
