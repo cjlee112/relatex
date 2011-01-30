@@ -11,91 +11,130 @@ def fmt_equations(t):
     t = re.sub(r'\\end{gather}', r'\\]', t)
     return t
 
-def rm_figures(t):
-    'remove figures from text; PNAS wants them inserted at the end'
+def extract_figures(t):
+    'remove figures from text; PLoS wants them inserted at the end'
+    t = re.sub(r'\\hypertarget{([^}]+)}{}', '', t)
+    t = re.sub(r'\\includegraphics', r'\\includegraphics[width=5in]', t)
+    t = re.sub(r'\\caption{\\textbf{([^}]+)}: ', r'\\caption{', t)
+    figures = ''
     while True:
-        i = t.find(r'\hypertarget')
+        i = t.find(r'\begin{figure}[htbp]') # which tag occurs first?
+        start = t.find(r'\includegraphics')
         if i < 0:
-            return t
-        j = t[i:].find(r'\end{figure}')
-        t = t[:i] + t[i + j + 12:]
+            if start < 0:
+                return t, figures # end of figures!!
+        elif start < 0 or i < start: # extract normal figure block
+            j = t[i:].find(r'\end{figure}') + 12
+            figures += t[i:i + 14] + '[H]' + t[i + 20:i + j] + '\n'
+            t = t[:i] + t[i + j:]
+            continue
+        j = t[start:].find('}') + 1 # extract bare includegraphics
+        figures += t[start:start + j] + '\n'
+        t = t[:start] + t[start + j:]
+    
+
+def cleanup_tables(t):
+    t = re.sub('threeparttable', 'table', t) # replace with standard table
+    t = re.sub(r'\\begin{table}', r'\\begin{table}[H]', t)
+    lastpos = 0
+    s = '' # replace non-standard tabulary env with standard tabular env
+    for m in re.finditer(r'\\begin{tabulary}{\\textwidth}{([^}]+)', t):
+        s += t[lastpos:m.start()] + r'\begin{tabular}{' + m.group(1).lower()
+        lastpos = m.end()
+    t = s + t[lastpos:]
+    t = re.sub(r'{tabulary}', r'{tabular}', t) #fix end mark as well
+    return t
+
+def extract_tables(t):
+    'extract tables from main text, return text and tables separately'
+    lastpos = 0
+    endTag = r'\end{table}'
+    s = tables = ''
+    while True:
+        try:
+            i = t[lastpos:].index(r'\begin{table}')
+        except ValueError:
+            break
+        s += t[lastpos:lastpos + i]
+        j = t[lastpos + i:].index(endTag) + len(endTag)
+        tables += t[lastpos + i:lastpos + i + j] + '\n'
+        lastpos += i + j
+    s += t[lastpos:]
+    return s, tables
+        
+
+def rm_hrefs(t):
+    return re.sub(r'\\href{([^}]+)}', '', t)
+
+def cleanup_subsections(t):
+    'PLoS subsections should not be numbered'
+    t = re.sub(r'\\subsection{', r'\\subsection*{', t)
+    t = re.sub(r'\\subsubsection{', r'\\subsubsection*{', t)
     return t
 
 def cleanup_text(t):
     t = fmt_equations(t)
-    t = rm_figures(t)
+    t = cleanup_tables(t)
+    t = rm_hrefs(t)
+    t = cleanup_subsections(t)
     return t
 
-def get_abstract(t):
-    tag = '{Abstract}'
+def get_section(t, tag):
     i = t.index(tag) + len(tag)
-    j = t[i:].index(r'\section')
+    try:
+        j = t[i:].index(r'\section')
+    except ValueError:
+        return t[i:]
     return t[i:i + j]
 
 def get_title(t):
     return re.search(r'\\title\{([^}]+)', t).group(1)
 
-def get_authors(t):
-    l = re.search(r'\\author\{([^}]+)', t).group(1).split(',')
-    return [s.strip() for s in l]
-    
+def get_bibname(t):
+    return re.search(r'\\bibliography\{([^}]+)', t).group(1)
+
 def get_text(t):
     i = t.index(r'\section')
     j = t.index(r'\bibliography')
     return cleanup_text(t[i:j])
 
-def get_bibliography(path):
-    ifile = open(path.split('.')[0] + '.bbl')
-    t = ifile.read()
-    ifile.close()
-    i = t.index(r'\begin{thebibliography}')
-    endtag = r'\end{thebibliography}'
-    j = t.index(endtag)
-    return t[i:j + len(endtag)]
+def append_after_tag(tag, t, rep, nskip=0):
+    i = t.index(tag) + len(tag)
+    return t[:i - nskip] + rep + t[i:]
 
-def replace_tag(tag, t, rep):
-    i = t.index(tag)
-    return t[:i] + rep + t[i + len(tag):]
-
-def insert_bibliography(t, bib):
-    i = t.index(r'\begin{thebibliography}{}')
-    endtag = r'\end{thebibliography}'
-    j = t.index(endtag)
-    return t[:i] + bib + t[j + len(endtag):]
-
-def template_fmt(template, authors, title, abstract, text, bib=None,
-                 affil='UCLA'):
-    'insert our paper sections into the PNAS latex template'
-    t = re.sub('insert title here', title, template)
-    authorship = []
-    for author in authors:
-        authorship.append(r'%s\affil{1}{%s}' % (author, affil))
-    t = replace_tag(r'\author{}', t, r'\author{' + ',\n'.join(authorship) + '}')
-    t = replace_tag('-- enter abstract text here --', t, abstract)
-    t = replace_tag('-- text of paper here --', t, text)
-    if bib:
-        t = insert_bibliography(t, bib)
-    # t = re.sub(r'\-\- enter abstract text here \-\-', abstract, t)
-    # t = re.sub(r'\-\- text of paper here \-\-', text, t)
+def template_fmt(template, title, bibname, text, tables, figures,
+                 sections=('Abstract', 'Introduction', 'Results',
+                           'Discussion', 'Materials and Methods',
+                           'Acknowledgments')):
+    'insert our paper sections into the PLoS latex template'
+    t = append_after_tag(r'\textbf{Title', template, title, 5)
+    for tag in sections:
+        tag = '{' + tag + '}'
+        sectionText = get_section(text, tag)
+        t = append_after_tag(tag, t, sectionText)
+    t = append_after_tag(r'\bibliography{template', t, bibname, 8)
+    t = append_after_tag(r'\section*{Figure Legends}', t, '\n' + figures)
+    t = append_after_tag(r'\section*{Tables}', t, '\n' + tables)
     return t
 
-def reformat_file(paperpath, outpath='pnasout.tex',
-                  templatepath='pnastmpl.tex', affil='UCLA'):
-    'do everything to reformat an input tex file to tex output file for PNAS'
-    ifile = open(paperpath)
+def reformat_file(paperpath, outpath='plosout.tex',
+                  templatepath='plos_template_cjl.tex'):
+    'do everything to reformat an input tex file to tex output file for PLoS'
+    ifile = open(paperpath) # read source latex from sphinx
     latex = ifile.read()
     ifile.close()
-    ifile = open(templatepath)
+    ifile = open(templatepath) # read latex template from PLoS
     template = ifile.read()
     ifile.close()
-    abstract = get_abstract(latex)
-    title = get_title(latex)
-    authors = get_authors(latex)
+
+    title = get_title(latex) # extract relevant sections from sphinx
     text = get_text(latex)
-    bib = get_bibliography(paperpath)
-    ifile = open(outpath, 'w')
-    ifile.write(template_fmt(template, authors, title, abstract, text, bib,
-                             affil))
+    text, tables = extract_tables(text)
+    text, figures = extract_figures(text)
+    bibname = get_bibname(latex)
+
+    ifile = open(outpath, 'w') # output text inserted into template
+    ifile.write(template_fmt(template, title, bibname, text, tables, figures))
     ifile.close()
 
 
