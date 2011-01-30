@@ -14,7 +14,7 @@ def fmt_equations(t):
 def extract_figures(t):
     'remove figures from text; PLoS wants them inserted at the end'
     t = re.sub(r'\\hypertarget{([^}]+)}{}', '', t)
-    t = re.sub(r'\\includegraphics', r'\\includegraphics[width=5in]', t)
+    #t = re.sub(r'\\includegraphics', r'\\includegraphics[width=5in]', t)
     t = re.sub(r'\\caption{\\textbf{([^}]+)}: ', r'\\caption{', t)
     figures = ''
     while True:
