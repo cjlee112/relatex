@@ -118,13 +118,27 @@ def cleanup_text(t):
     t = cleanup_subsections(t)
     return t
 
-def get_section(t, tag):
-    i = t.index(tag) + len(tag)
-    try:
-        j = t[i:].index(r'\section')
-    except ValueError:
-        return t[i:]
-    return t[i:i + j]
+def get_sections(t, tag=r'\section'):
+    'return dict of document sections with section names as keys'
+    sections = {}
+    i = 0
+    name = None
+    while True:
+        try:
+            j = t[i:].index(tag)
+            if name: # save previous section
+                sections[name] = t[i:i + j]
+            i += j
+        except ValueError:
+            if name: # save terminal section
+                sections[name] = t[i:]
+            break
+        i += t[i:].index('{') + 1 # find start & end of section name
+        j = t[i:].index('}')
+        name = t[i:i + j]
+        i += j + 2 # skip past } and newline
+    return sections
+        
 
 def get_title(t):
     return re.search(r'\\title\{([^}]+)', t).group(1)
@@ -184,14 +198,9 @@ def read_affiliations(filename, authors):
     return l
 
 def template_fmt(template, title, authors, affiliations,
-                 bibname, text, tables, figures,
-                 sections=('Abstract', 'Introduction', 'Results',
-                           'Discussion', 'Materials and Methods',
-                           'Acknowledgments')):
+                 bibname, text, tables, figures):
     'insert our paper sections into the PLoS latex template'
-    section = {}
-    for tag in sections:
-        section[tag] = get_section(text, '{' + tag + '}')
+    section = get_sections(text) # extract individual sections
     return template.render(title=title, authors=authors,
                            affiliations=affiliations, section=section,
                            bibname=bibname, figures=figures, tables=tables)
