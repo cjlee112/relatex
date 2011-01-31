@@ -114,6 +114,13 @@ def get_section(t, tag):
 def get_title(t):
     return re.search(r'\\title\{([^}]+)', t).group(1)
 
+def get_authors(t):
+    names = re.search(r'\\author\{([^}]+)', t).group(1).split(',')
+    l = []
+    for name in names:
+        l.append(Author(name.strip()))
+    return l
+
 def get_bibname(t):
     return re.search(r'\\bibliography\{([^}]+)', t).group(1)
 
@@ -126,7 +133,43 @@ def append_after_tag(tag, t, rep, nskip=0):
     i = t.index(tag) + len(tag)
     return t[:i - nskip] + rep + t[i:]
 
-def template_fmt(template, title, bibname, text, tables, figures,
+class Author(object):
+    def __init__(self, name):
+        self.name = name
+        self.affiliations = []
+
+    def add_affiliation(self, aff):
+        self.affiliations.append(aff)
+
+    def get_affiliations(self, key=None, linker=','):
+        if key is None:
+            return linker.join([str(aff.id) for aff in self.affiliations])
+        else:
+            return linker.join([key[aff.id - 1] for aff in self.affiliations])
+            
+class Affiliation(object):
+    def __init__(self, id, label):
+        self.id = id
+        self.label = label
+
+def read_affiliations(filename, authors):
+    ifile = open(filename)
+    l = []
+    try:
+        for i,line in enumerate(ifile):
+            t = line.strip().split('\t')
+            aff = Affiliation(i + 1, t[0])
+            for au in t[1:]:
+                for author in authors:
+                    if au in author.name:
+                        author.add_affiliation(aff)
+            l.append(aff)
+    finally:
+        ifile.close()
+    return l
+
+def template_fmt(template, title, authors, affiliations,
+                 bibname, text, tables, figures,
                  sections=('Abstract', 'Introduction', 'Results',
                            'Discussion', 'Materials and Methods',
                            'Acknowledgments')):
@@ -134,11 +177,13 @@ def template_fmt(template, title, bibname, text, tables, figures,
     section = {}
     for tag in sections:
         section[tag] = get_section(text, '{' + tag + '}')
-    return template.render(title=title, section=section, bibname=bibname,
-                           figures=figures, tables=tables)
+    return template.render(title=title, authors=authors,
+                           affiliations=affiliations, section=section,
+                           bibname=bibname, figures=figures, tables=tables)
 
 def reformat_file(paperpath, outpath='plosout.tex',
-                  templatepath='plos_template_cjl.tex'):
+                  templatepath='plos_template_cjl.tex',
+                  affiliations='affiliations.txt'):
     'do everything to reformat an input tex file to tex output file for PLoS'
     ifile = open(paperpath) # read source latex from sphinx
     latex = ifile.read()
@@ -152,9 +197,12 @@ def reformat_file(paperpath, outpath='plosout.tex',
     text, tables = extract_tables(text)
     text, figures = extract_figures(text)
     bibname = get_bibname(latex)
+    authors = get_authors(latex)
+    affiliations = read_affiliations(affiliations, authors)
 
     ifile = open(outpath, 'w') # output text inserted into template
-    ifile.write(template_fmt(template, title, bibname, text, tables, figures))
+    ifile.write(template_fmt(template, title, authors, affiliations,
+                             bibname, text, tables, figures))
     ifile.close()
 
 

@@ -1,0 +1,6 @@
+Institute for Genomics and Proteomics, University of California, Los Angeles, CA, USA	Harper	Machado	Liao	Lee
+Dept. of Human Genetics, University of California, Los Angeles, CA, USA	Chen	Toy	Nelson
+Dept. of Chemical Engineering,  University of California, Los Angeles, CA, USA	Machado	Liao
+Dept. of Chemistry \& Biochemistry,  University of California, Los Angeles, CA, USA	Lee
+Dept. of Computer Science,  University of California, Los Angeles, CA, USA	Lee
+Molecular Biology Institute,  University of California, Los Angeles, CA, USA	Lee
