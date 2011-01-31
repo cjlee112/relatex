@@ -69,11 +69,20 @@ def cleanup_tables(t):
     t = re.sub(r'{tabulary}', r'{tabular}', t) #fix end mark as well
     return t
 
+class Table(object):
+    def __init__(self, tabular, columnFormats, caption, legend=''):
+        self.tabular = tabular
+        self.columnFormats = columnFormats
+        self.caption = caption
+        self.legend = legend
+
 def extract_tables(t):
     'extract tables from main text, return text and tables separately'
     lastpos = 0
     endTag = r'\end{table}'
-    s = tables = ''
+    tabularTag = r'\begin{tabular}{'
+    s = ''
+    tables = []
     while True:
         try:
             i = t[lastpos:].index(r'\begin{table}')
@@ -81,7 +90,14 @@ def extract_tables(t):
             break
         s += t[lastpos:lastpos + i]
         j = t[lastpos + i:].index(endTag) + len(endTag)
-        tables += t[lastpos + i:lastpos + i + j] + '\n'
+        tableStr = t[lastpos + i:lastpos + i + j]
+        caption = re.search(r'\\caption\{([^}]+)', tableStr).group(1)
+        k = tableStr.index(tabularTag) + len(tabularTag)
+        l = tableStr[k:].index('}')
+        columnFormats = tableStr[k:k + l]
+        m = tableStr[k:].index(r'\end{tabular}')
+        tables.append(Table(tableStr[k + l + 1:k + m], columnFormats,
+                            caption))
         lastpos += i + j
     s += t[lastpos:]
     return s, tables

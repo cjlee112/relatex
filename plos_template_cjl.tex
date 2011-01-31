@@ -137,17 +137,18 @@ $\ast$ E-mail: Corresponding leec@chem.ucla.edu
 
 \newpage
 \section*{Tables}
-{{ tables }}
-%\begin{table}[!ht]
-%\caption{
-%\bf{Table title}}
-%\begin{tabular}{|c|c|c|}
-%table information
-%\end{tabular}
+{% for table in tables %}
+\begin{table}[!ht]
+\caption{
+\bf{ {{- table.caption -}} }}
+\begin{tabular}{ {{- table.columnFormats -}} }
+{{ table.tabular }}
+\end{tabular}
 %\begin{flushleft}Table caption
 %\end{flushleft}
 %\label{tab:label}
-% \end{table}
+\end{table}
+{% endfor %}
 
 \end{document}
 
