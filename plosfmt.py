@@ -1,5 +1,8 @@
 from jinja2 import Template
 import re
+import os.path
+import glob
+import sys
 
 def fmt_equations(t):
     'replace wierd Sphinx equation fmt with standard displaymath'
@@ -230,6 +233,30 @@ def reformat_file(paperpath, outpath='plosout.tex',
     ifile.close()
 
 
+def default_outfile(paperpath, templateName):
+    return '%s_%s.tex' % (os.path.basename(paperpath).split('.')[0],
+                          templateName)
+
+def default_infile(dirs=('_build/latex', 'build/latex')):
+    'search for a sphinx-generated latex file'
+    for dirpath in dirs:
+        if os.path.isdir(dirpath):
+            l = glob.glob(os.path.join(dirpath, '*.tex'))
+            break
+    if len(l) != 1:
+        raise ValueError('did not find unique latex source file: ' + str(l))
+    return l[0]
+
+def default_template(templateName, filename='template.tex'):
+    return os.path.join(sys.path[0], 'templates', templateName, filename)
+
 if __name__ == '__main__':
-    import sys
-    reformat_file(*sys.argv[1:])
+    templateName = sys.argv[1]
+    templatePath = default_template(templateName)
+    try:
+        paperpath = sys.argv[2]
+    except IndexError:
+        paperpath = default_infile()
+    outpath = default_outfile(paperpath, templateName)
+    print 'writing output to', outpath
+    reformat_file(paperpath, outpath, templatePath, *sys.argv[3:])
