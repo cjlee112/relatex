@@ -121,19 +121,18 @@ $\ast$ E-mail: Corresponding leec@chem.ucla.edu
 
 \newpage
 \section*{Figure Legends}
-{{ figures }}
-%\begin{figure}[!ht]
-%\begin{center}
-%%\includegraphics[width=4in]{figure_name.2.eps}
-%\end{center}
-%\caption{
-%{\bf Bold the first sentence.}  Rest of figure 2  caption.  Caption 
-%should be left justified, as specified by the options to the caption 
-%package.
-%}
+{% for figure in figures %}
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics {{- figure.options -}} { {{- figure.imagefile -}} }
+\end{center}
+\caption{
+{\bf {{ figure.caption }} }
+{{- figure.legend -}}
+}
 %\label{Figure_label}
-%\end{figure}
-
+\end{figure}
+{% endfor %}
 
 \newpage
 \section*{Tables}

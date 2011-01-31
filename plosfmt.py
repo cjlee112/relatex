@@ -11,33 +11,35 @@ def fmt_equations(t):
     t = re.sub(r'\\end{gather}', r'\\]', t)
     return t
 
-def extract_legend(t):
-    'extract caption following PLOS production figure legend standard'
-    t = re.sub(r'\[htbp\]', '[!ht]', t)
-    t = re.sub(r'\\centering', '', t)
-    t = re.sub(r'\\includegraphics([^{]*){([^}]+)}', '', t) # rm image
-    t = re.sub(r'{\\small', '', t)
-    t = re.sub(r'}\\end', '}\n' + r'\\end', t)
-    t = re.sub('\n\n', '\n', t) # caption cannot contain multiple paragraphs
-    first = True
-    while True: # get rid of emphasis
-        i = t.find(r'\emph{')
-        if i < 0: # done
-            break
-        j = t.index('}', i)
-        if first: # PLOS wants first sentence in bold
-            t = t[:i] + r'{\bf ' + t[i + 6:j] + '.' + t[j + 1:]
-            first = False
-        else:
-            t = t[:i] + t[i + 6:j] + t[j + 1:]
-    return t + '\n\n'
+class Figure(object):
+    def __init__(self, imagefile, caption, legend, options=''):
+        self.imagefile = imagefile
+        self.caption = caption
+        self.legend = legend
+        self.options = options
+
+def save_figure(t, imageOnly=False):
+    m = re.search(r'\\includegraphics([^{]*){([^}]+)', t)
+    options = m.group(1)
+    imagefile = m.group(2)
+    if imageOnly:
+        return Figure(imagefile, '', '', options)
+    tag = r'\caption{'
+    i = t.index(tag) + len(tag)
+    tag = r'}{\small'
+    j = t.index(tag)
+    caption = t[i:j]
+    k = t.index(r'}\end{figure}')
+    legend = re.sub('\n\n', '\n', t[j + len(tag):k]) # caption cannot contain multiple paragraphs
+    return Figure(imagefile, caption, legend, options)
 
 def extract_figures(t, legendsOnly=True):
     'remove figures from text; PLoS wants them inserted at the end'
     t = re.sub(r'\\hypertarget{([^}]+)}{}', '', t)
     #t = re.sub(r'\\includegraphics', r'\\includegraphics[width=5in]', t)
-    t = re.sub(r'\\caption{\\textbf{([^}]+)}: ', r'\\caption{', t)
-    figures = ''
+    # remove hard-coded Figure labels required by Sphinx
+    t = re.sub(r'\\caption{\\textbf{(Figure[^}]+)}: ', r'\\caption{', t)
+    figures = []
     while True:
         i = t.find(r'\begin{figure}[htbp]') # which tag occurs first?
         start = t.find(r'\includegraphics')
@@ -46,14 +48,11 @@ def extract_figures(t, legendsOnly=True):
                 return t, figures # end of figures!!
         elif start < 0 or i < start: # extract normal figure block
             j = t[i:].index(r'\end{figure}') + 12
-            if legendsOnly:
-                figures += extract_legend(t[i:i + j])
-            else:
-                figures += t[i:i + 14] + '[H]' + t[i + 20:i + j] + '\n'
+            figures.append(save_figure(t[i:i + j]))
             t = t[:i] + t[i + j:]
             continue
         j = t[start:].index('}') + 1 # extract bare includegraphics
-        figures += t[start:start + j] + '\n'
+        figures.append(save_figure(t[start:start + j], True))
         t = t[:start] + t[start + j:]
     
 
