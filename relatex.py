@@ -3,6 +3,7 @@ import re
 import os.path
 import glob
 import sys
+import optparse
 
 def fmt_equations(t):
     'replace wierd Sphinx equation fmt with standard displaymath'
@@ -121,26 +122,31 @@ def cleanup_text(t):
     t = cleanup_subsections(t)
     return t
 
-def get_sections(t, tag=r'\section'):
-    'return dict of document sections with section names as keys'
-    sections = {}
-    i = 0
-    name = None
-    while True:
-        try:
-            j = t[i:].index(tag)
-            if name: # save previous section
-                sections[name] = t[i:i + j]
-            i += j
-        except ValueError:
-            if name: # save terminal section
-                sections[name] = t[i:]
-            break
-        i += t[i:].index('{') + 1 # find start & end of section name
-        j = t[i:].index('}')
-        name = t[i:i + j]
-        i += j + 2 # skip past } and newline
-    return sections
+class SectionDict(dict):
+    def __init__(self, t, tag=r'\section'):
+        'return dict of document sections with section names as keys'
+        dict.__init__(self)
+        i = 0
+        l = []
+        name = None
+        while True:
+            try:
+                j = t[i:].index(tag)
+                if name: # save previous section
+                    self[name] = t[i:i + j]
+                    l.append(name)
+                i += j
+            except ValueError:
+                if name: # save terminal section
+                    self[name] = t[i:]
+                    l.append(name)
+                break
+            i += t[i:].index('{') + 1 # find start & end of section name
+            j = t[i:].index('}')
+            name = t[i:i + j]
+            i += j + 2 # skip past } and newline
+        self.order = l # record the original order of the sections
+
         
 
 def get_title(t):
@@ -150,11 +156,31 @@ def get_authors(t):
     names = re.search(r'\\author\{([^}]+)', t).group(1).split(',')
     l = []
     for name in names:
-        l.append(Author(name.strip()))
+        name = name.strip()
+        if name.startswith('and '):
+            name = name[4:]
+        l.append(Author(name))
     return l
 
 def get_bibname(t):
     return re.search(r'\\bibliography\{([^}]+)', t).group(1)
+
+def read_bbl(bblpath):
+    ifile = open(bblpath)
+    inBib = False
+    bbl = ''
+    try:
+        for line in ifile:
+            if line.startswith(r'\begin{thebibliography}'):
+                bibCount = line.split('}')[1][1:]
+                inBib = True
+            elif line.startswith(r'\end{thebibliography}'):
+                inBib = False
+            elif inBib:
+                bbl += line
+    finally:
+        ifile.close()
+    return bbl, bibCount
 
 def get_text(t):
     i = t.index(r'\section')
@@ -173,16 +199,28 @@ class Author(object):
     def add_affiliation(self, aff):
         self.affiliations.append(aff)
 
-    def get_affiliations(self, key=None, linker=','):
-        if key is None:
-            return linker.join([str(aff.id) for aff in self.affiliations])
+    def get_affiliations(self, fmt=None, key=None, linker=','):
+        if fmt: # user-provided format string
+            l = []
+            for aff in self.affiliations:
+                d = dict(id=str(aff.id), label=aff.label, labelOnce=aff.label)
+                if aff.alreadyPrinted:
+                    d['labelOnce'] = ''
+                if key:
+                    d['key'] = key[aff.id - 1]
+                l.append(fmt % d)
+                aff.alreadyPrinted = True
+        elif key is None:
+            l = [str(aff.id) for aff in self.affiliations]
         else:
-            return linker.join([key[aff.id - 1] for aff in self.affiliations])
+            l = [key[aff.id - 1] for aff in self.affiliations]
+        return linker.join(l)
             
 class Affiliation(object):
     def __init__(self, id, label):
         self.id = id
         self.label = label
+        self.alreadyPrinted = False
 
 def read_affiliations(filename, authors):
     ifile = open(filename)
@@ -201,16 +239,17 @@ def read_affiliations(filename, authors):
     return l
 
 def template_fmt(template, title, authors, affiliations,
-                 bibname, text, tables, figures):
+                 bibname, text, tables, figures, **kwargs):
     'insert our paper sections into the PLoS latex template'
-    section = get_sections(text) # extract individual sections
+    section = SectionDict(text) # extract individual sections
     return template.render(title=title, authors=authors,
                            affiliations=affiliations, section=section,
-                           bibname=bibname, figures=figures, tables=tables)
+                           bibname=bibname, figures=figures, tables=tables,
+                           **kwargs)
 
 def reformat_file(paperpath, outpath='plosout.tex',
                   templatepath='plos_template_cjl.tex',
-                  affiliations='affiliations.txt'):
+                  affiliations='affiliations.txt', **kwargs):
     'do everything to reformat an input tex file to tex output file for PLoS'
     ifile = open(paperpath) # read source latex from sphinx
     latex = ifile.read()
@@ -229,7 +268,7 @@ def reformat_file(paperpath, outpath='plosout.tex',
 
     ifile = open(outpath, 'w') # output text inserted into template
     ifile.write(template_fmt(template, title, authors, affiliations,
-                             bibname, text, tables, figures))
+                             bibname, text, tables, figures, **kwargs))
     ifile.close()
 
 
@@ -250,13 +289,30 @@ def default_infile(dirs=('_build/latex', 'build/latex')):
 def default_template(templateName, filename='template.tex'):
     return os.path.join(sys.path[0], 'templates', templateName, filename)
 
+
+def get_options():
+    parser = optparse.OptionParser()
+    parser.add_option(
+        '--bbl', action="store", type="string",
+        dest="bbl", 
+        help="path to .bbl bibliography file")
+    return parser.parse_args()
+
 if __name__ == '__main__':
-    templateName = sys.argv[1]
+    options, args = get_options()
+    templateName = args[0]
+    args = args[1:]
     templatePath = default_template(templateName)
     try:
-        paperpath = sys.argv[2]
+        paperpath = args[0]
+        args = args[1:]
     except IndexError:
         paperpath = default_infile()
+    if options.bbl:
+        bbl,bibCount = read_bbl(options.bbl)
+    else:
+        bbl = bibCount = None
     outpath = default_outfile(paperpath, templateName)
     print 'writing output to', outpath
-    reformat_file(paperpath, outpath, templatePath, *sys.argv[3:])
+    reformat_file(paperpath, outpath, templatePath,
+                  thebibliography=bbl, bibCount=bibCount, *args)
