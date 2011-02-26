@@ -95,7 +95,7 @@ of the National Academy of Sciences of the United States of America}
 %% For titles, only capitalize the first letter
 %% \title{Almost sharp fronts for the surface quasi-geostrophic equation}
 
-\title{insert title here}
+\title{ {{- title.capitalize() -}} }
 
 
 %% Enter authors via the \author command.  
@@ -122,7 +122,17 @@ of the National Academy of Sciences of the United States of America}
 %% Javier de Ruiz Garcia\affil{2}{Universidad de Murcia, Bioquimica y Biologia
 %% Molecular, Murcia, Spain}, \and Franklin Sonnery\affil{2}{}}
 
-\author{}
+\author{
+{%- for author in authors -%}
+   {%- if loop.last -%}
+      \and
+   {%- elif not loop.first -%}
+      ,
+   {%- endif %}
+   {{ author.name -}}
+   {{- author.get_affiliations('\\affil{%(id)s}{%(labelOnce)s}', linker='') -}}
+{% endfor -%}
+}
 
 \contributor{Submitted to Proceedings of the National Academy of Sciences
 of the United States of America}
@@ -133,7 +143,7 @@ of the United States of America}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{article}
 
-\begin{abstract} -- enter abstract text here -- \end{abstract}
+\begin{abstract} {{- section['Abstract'] -}} \end{abstract}
 
 
 %% When adding keywords, separate each term with a straight line: |
@@ -157,7 +167,14 @@ of the United States of America}
 %% \subsection{}
 %% \subsubsection{}
 
--- text of paper here --
+{% for sectionName in section.order %}
+   {% if sectionName not in ('Abstract', 'Materials and Methods', 'Acknowledgments') %}
+      
+\section{ {{- sectionName -}} }
+{{ section[sectionName] }}
+
+   {% endif %}
+{% endfor %}
 
 %% == end of paper:
 
@@ -165,10 +182,11 @@ of the United States of America}
 %% The Materials and Methods section header will be added automatically.
 
 %% Enter any subheads and the Materials and Methods text below.
-%\begin{materials}
-% Materials text
-%\end{materials}
-
+{% if 'Materials and Methods' in section %}
+\begin{materials}
+{{ section['Materials and Methods'] }}
+\end{materials}
+{% endif %}
 
 %% Optional Appendix or Appendices
 %% \appendix Appendix text...
@@ -176,7 +194,7 @@ of the United States of America}
 %% \appendix[Appendix Title]
 
 \begin{acknowledgments}
--- text of acknowledgments here, including grant info --
+{{ section['Acknowledgments'] }}
 \end{acknowledgments}
 
 %% PNAS does not support submission of supporting .tex files such as BibTeX.
@@ -204,8 +222,8 @@ of the United States of America}
 %% Enter the largest bibliography number in the facing curly brackets
 %% following \begin{thebibliography}
 
-\begin{thebibliography}{}
-
+\begin{thebibliography}{ {{- bibCount -}} }
+{{ thebibliography }}
 \end{thebibliography}
 
 \end{article}
@@ -221,6 +239,15 @@ of the United States of America}
 %% \caption{Almost Sharp Front}\label{afoto}
 %% \end{figure}
 
+{% for figure in figures %}
+\begin{figure}
+\caption{ {{- figure.caption -}} }
+{{ figure.legend }}
+%\label{Figure_label}
+\end{figure}
+{% endfor %}
+
+
 %% For Tables, put caption above table
 %%
 %% Table caption should start with a capital letter, continue with lower case
@@ -234,6 +261,16 @@ of the United States of America}
 %% table text
 %% \end{tabular}
 %% \end{table}
+
+{% for table in tables %}
+\begin{table}
+\caption{ {{- table.caption -}} }
+\begin{tabular}{@{\vrule height 10.5pt depth4pt  width0pt} {{- table.columnFormats -}} }
+{{ table.tabular }}
+\end{tabular}
+\end{table}
+{% endfor %}
+
 
 %% For two column figures and tables, use the following:
 
