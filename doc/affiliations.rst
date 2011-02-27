@@ -17,7 +17,7 @@ you want to use.  The format is very simple:
   to appear for that affiliation, followed by a tab-separated
   list of authors that have that affiliation.  Note that
   you can specify an author by giving any unique substring
-  of their full name as it appears in the input latex \author{}
+  of their full name as it appears in the input latex ``\author{}``
   list.  We recommend that you simply give the last name
   of each author (assuming it is unique).
 
