@@ -13,6 +13,7 @@ Contents:
 
    tutorial
    command
+   affiliations
 
 Indices and tables
 ==================

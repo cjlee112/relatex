@@ -20,6 +20,10 @@ template name appended to its file prefix, i.e. running
 the ``pnas`` template on a ``test.tex``
 input file will generate a ``test_pnas.tex`` output file.
 
+Note that ReLaTeX also looks for an ``affiliations.txt``
+*affiliations* file in the current directory.  For more 
+info see :doc:`affiliations`.
+
 In addition, it accepts the following options:
 
 * ``--bbl BBL-PATH``: some templates (e.g. PNAS) require 
