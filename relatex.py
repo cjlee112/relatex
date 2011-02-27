@@ -39,7 +39,7 @@ def save_figure(t, imageOnly=False):
     return Figure(imagefile, caption, legend, options)
 
 def extract_figures(t, legendsOnly=True):
-    'remove figures from text; PLoS wants them inserted at the end'
+    'remove figures from text; many journals want them inserted at the end'
     t = re.sub(r'\\hypertarget{([^}]+)}{}', '', t)
     #t = re.sub(r'\\includegraphics', r'\\includegraphics[width=5in]', t)
     # remove hard-coded Figure labels required by Sphinx
@@ -110,17 +110,18 @@ def extract_tables(t):
 def rm_hrefs(t):
     return re.sub(r'\\href{([^}]+)}', '', t)
 
-def cleanup_subsections(t):
-    'PLoS subsections should not be numbered'
+def denumber_subsections(t):
+    'use if subsections should not be numbered'
     t = re.sub(r'\\subsection{', r'\\subsection*{', t)
     t = re.sub(r'\\subsubsection{', r'\\subsubsection*{', t)
     return t
 
-def cleanup_text(t):
+def cleanup_text(t, denumberSubsections=False):
     t = fmt_equations(t)
     t = cleanup_tables(t)
     t = rm_hrefs(t)
-    t = cleanup_subsections(t)
+    if denumberSubsections:
+        t = denumber_subsections(t)
     return t
 
 class SectionDict(dict):
@@ -183,10 +184,10 @@ def read_bbl(bblpath):
         ifile.close()
     return bbl, bibCount
 
-def get_text(t):
+def get_text(t, denumberSubsections=False):
     i = t.index(r'\section')
     j = t.index(r'\bibliography')
-    return cleanup_text(t[i:j])
+    return cleanup_text(t[i:j], denumberSubsections)
 
 def append_after_tag(tag, t, rep, nskip=0):
     i = t.index(tag) + len(tag)
@@ -241,7 +242,7 @@ def read_affiliations(filename, authors):
 
 def template_fmt(template, title, authors, affiliations,
                  bibname, text, tables, figures, **kwargs):
-    'insert our paper sections into the PLoS latex template'
+    'insert our paper sections into the latex template'
     section = SectionDict(text) # extract individual sections
     return template.render(title=title, authors=authors,
                            affiliations=affiliations, section=section,
@@ -259,20 +260,20 @@ def copy_template_files(templatepath, outpath):
         if path != templatepath:
             shutil.copy(path, outdir)
 
-def reformat_file(paperpath, outpath='plosout.tex',
-                  templatepath='plos_template_cjl.tex',
+def reformat_file(paperpath, outpath='out.tex',
+                  templatepath='template.tex',
                   affiliations='affiliations.txt',
-                  copyExtraFiles=True, **kwargs):
-    'do everything to reformat an input tex file to tex output file for PLoS'
+                  copyExtraFiles=True, denumberSubsections=False, **kwargs):
+    'do everything to reformat an input tex file into latex template'
     ifile = open(paperpath) # read source latex from sphinx
     latex = ifile.read()
     ifile.close()
-    ifile = open(templatepath) # read latex template from PLoS
+    ifile = open(templatepath) # read latex template
     template = Template(ifile.read())
     ifile.close()
 
     title = get_title(latex) # extract relevant sections from sphinx
-    text = get_text(latex)
+    text = get_text(latex, denumberSubsections)
     text, tables = extract_tables(text)
     text, figures = extract_figures(text)
     bibname = get_bibname(latex)
@@ -315,6 +316,10 @@ def get_options():
         '--no-extra-files', action="store_false", dest="copyExtraFiles",
         default=True,
         help='do not copy extra template files to output directory')
+    parser.add_option(
+        '--no-subsection-numbers', action="store_true",
+        dest="denumberSubsections", default=False,
+        help='prevent numbering of subsections')
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -335,4 +340,5 @@ if __name__ == '__main__':
     print 'writing output to', outpath
     reformat_file(paperpath, outpath, templatePath,
                   thebibliography=bbl, bibCount=bibCount,
-                  copyExtraFiles=options.copyExtraFiles, *args)
+                  copyExtraFiles=options.copyExtraFiles,
+                  denumberSubsections=options.denumberSubsections, *args)
