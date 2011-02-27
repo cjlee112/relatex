@@ -32,9 +32,14 @@ def save_figure(t, imageOnly=False):
     tag = r'\caption{'
     i = t.index(tag) + len(tag)
     tag = r'}{\small'
-    j = t.index(tag)
+    j = t.find(tag)
+    if j < 0: # search for closing brace
+        tag = '}'
+        j = i + t[i:].index(tag)
     caption = t[i:j]
-    k = t.index(r'}\end{figure}')
+    k = t.index(r'\end{figure}')
+    if t[k - 1] == '}': # catch }\end{figure} from sphinx
+        k -= 1
     legend = re.sub('\n\n', '\n', t[j + len(tag):k]) # caption cannot contain multiple paragraphs
     return Figure(imagefile, caption, legend, options)
 
@@ -46,7 +51,7 @@ def extract_figures(t, legendsOnly=True):
     t = re.sub(r'\\caption{\\textbf{(Figure[^}]+)}: ', r'\\caption{', t)
     figures = []
     while True:
-        i = t.find(r'\begin{figure}[htbp]') # which tag occurs first?
+        i = t.find(r'\begin{figure}') # which tag occurs first?
         start = t.find(r'\includegraphics')
         if i < 0:
             if start < 0:
@@ -125,7 +130,7 @@ def cleanup_text(t, denumberSubsections=False):
     return t
 
 class SectionDict(dict):
-    def __init__(self, t, tag=r'\section'):
+    def __init__(self, t, fullLatex, tag=r'\section'):
         'return dict of document sections with section names as keys'
         dict.__init__(self)
         i = 0
@@ -148,7 +153,13 @@ class SectionDict(dict):
             name = t[i:i + j]
             i += j + 2 # skip past } and newline
         self.order = l # record the original order of the sections
-
+        
+        tag = r'\begin{abstract}' # look for regular latex abstract
+        i = fullLatex.find(tag)
+        if i > 0:
+            j = fullLatex.index(r'\end{abstract}')
+            abstract = fullLatex[i + len(tag):j]
+            self['Abstract'] = abstract.strip()
         
 
 def get_title(t):
@@ -241,9 +252,8 @@ def read_affiliations(filename, authors):
     return l
 
 def template_fmt(template, title, authors, affiliations,
-                 bibname, text, tables, figures, **kwargs):
+                 bibname, section, tables, figures, **kwargs):
     'insert our paper sections into the latex template'
-    section = SectionDict(text) # extract individual sections
     return template.render(title=title, authors=authors,
                            affiliations=affiliations, section=section,
                            bibname=bibname, figures=figures, tables=tables,
@@ -276,13 +286,14 @@ def reformat_file(paperpath, outpath='out.tex',
     text = get_text(latex, denumberSubsections)
     text, tables = extract_tables(text)
     text, figures = extract_figures(text)
+    section = SectionDict(text, latex) # extract individual sections
     bibname = get_bibname(latex)
     authors = get_authors(latex)
     affiliations = read_affiliations(affiliations, authors)
 
     ifile = open(outpath, 'w') # output text inserted into template
     ifile.write(template_fmt(template, title, authors, affiliations,
-                             bibname, text, tables, figures, **kwargs))
+                             bibname, section, tables, figures, **kwargs))
     ifile.close()
     if copyExtraFiles: # copy extra template files to output directory
         copy_template_files(templatepath, outpath)
@@ -320,6 +331,10 @@ def get_options():
         '--no-subsection-numbers', action="store_true",
         dest="denumberSubsections", default=False,
         help='prevent numbering of subsections')
+    parser.add_option(
+        '--email', action="store", type="string",
+        dest="email", default='please provide an address',
+        help="email address of the corresponding author")
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -341,4 +356,5 @@ if __name__ == '__main__':
     reformat_file(paperpath, outpath, templatePath,
                   thebibliography=bbl, bibCount=bibCount,
                   copyExtraFiles=options.copyExtraFiles,
-                  denumberSubsections=options.denumberSubsections, *args)
+                  denumberSubsections=options.denumberSubsections,
+                  emailAddress=options.email, *args)
