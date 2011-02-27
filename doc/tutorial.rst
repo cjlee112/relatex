@@ -1,5 +1,11 @@
-simple rewriter for converting Sphinx latex output to different latex
-templates.
+
+######################
+Basic ReLaTeX Tutorial
+######################
+
+ReLaTeX takes text from your input latex file and "injects"
+it into a latex template e.g. a standard latex template for
+submitting to a specific scientific journal.  
 
 Examples
 --------
@@ -7,7 +13,7 @@ Examples
 A Simple Document
 .................
 
-Directory example1 contains a very simple Latex document for 
+Directory ``example1`` contains a very simple Latex document for 
 testing different journal templates.  You can test it as follows::
 
   cd example1
@@ -26,7 +32,7 @@ usual way, e.g.::
 A Real Paper
 ............
 
-Directory example 2 contains a full paper, generated from 
+Directory ``example2`` contains a full paper, generated from 
 reStructured Text by the Python Sphinx package.  We can test
 inserting it into the PNAS and PLoS templates as follows::
 
