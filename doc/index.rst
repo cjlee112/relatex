@@ -14,6 +14,7 @@ Contents:
    tutorial
    command
    affiliations
+   templating
 
 Indices and tables
 ==================
