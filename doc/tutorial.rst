@@ -14,7 +14,10 @@ A Simple Document
 .................
 
 Directory ``example1`` contains a very simple Latex document for 
-testing different journal templates.  You can test it as follows::
+testing different journal templates.  You can test it as follows
+on the PLoS template
+(the ``--email`` option gives the corresponding author's
+email address, required by PLoS)::
 
   cd example1
   python ../relatex.py plos simple.tex --email yogi@cs.technion.ac.il
