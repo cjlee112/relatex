@@ -1,9 +1,10 @@
 from jinja2 import Template
 import re
-import os.path
+import os
 import glob
 import sys
 import optparse
+import shutil
 
 def fmt_equations(t):
     'replace wierd Sphinx equation fmt with standard displaymath'
@@ -247,9 +248,21 @@ def template_fmt(template, title, authors, affiliations,
                            bibname=bibname, figures=figures, tables=tables,
                            **kwargs)
 
+def copy_template_files(templatepath, outpath):
+    'copy additional template files to same directory as the output'
+    templatedir = os.path.dirname(templatepath)
+    files = glob.glob(os.path.join(templatedir, '*'))
+    outdir = os.path.dirname(outpath)
+    if not outdir:
+        outdir = os.getcwd()
+    for path in files:
+        if path != templatepath:
+            shutil.copy(path, outdir)
+
 def reformat_file(paperpath, outpath='plosout.tex',
                   templatepath='plos_template_cjl.tex',
-                  affiliations='affiliations.txt', **kwargs):
+                  affiliations='affiliations.txt',
+                  copyExtraFiles=True, **kwargs):
     'do everything to reformat an input tex file to tex output file for PLoS'
     ifile = open(paperpath) # read source latex from sphinx
     latex = ifile.read()
@@ -270,6 +283,8 @@ def reformat_file(paperpath, outpath='plosout.tex',
     ifile.write(template_fmt(template, title, authors, affiliations,
                              bibname, text, tables, figures, **kwargs))
     ifile.close()
+    if copyExtraFiles: # copy extra template files to output directory
+        copy_template_files(templatepath, outpath)
 
 
 def default_outfile(paperpath, templateName):
@@ -296,6 +311,10 @@ def get_options():
         '--bbl', action="store", type="string",
         dest="bbl", 
         help="path to .bbl bibliography file")
+    parser.add_option(
+        '--no-extra-files', action="store_false", dest="copyExtraFiles",
+        default=True,
+        help='do not copy extra template files to output directory')
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -315,4 +334,5 @@ if __name__ == '__main__':
     outpath = default_outfile(paperpath, templateName)
     print 'writing output to', outpath
     reformat_file(paperpath, outpath, templatePath,
-                  thebibliography=bbl, bibCount=bibCount, *args)
+                  thebibliography=bbl, bibCount=bibCount,
+                  copyExtraFiles=options.copyExtraFiles, *args)
