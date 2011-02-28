@@ -119,3 +119,23 @@ above provide this information.
 You then generate PDFs from the resulting ``test_pnas.tex`` and
 ``test_plos.tex`` output files as usual.
 
+Using ReLaTeX with Sphinx
+-------------------------
+
+We recommend you use the ``howto`` Sphinx document style 
+(instead of the ``manual`` style, which is more appropriate
+for a book format rather than an article format).  
+
+If you don't specify an input file path,
+ReLaTeX will look automatically in your ``_build/latex``
+directory (where Sphinx writes its latex file).  So you 
+can run ReLaTeX by just specifying the template name::
+
+  make latex
+  relatex.py pnas --bbl my.bbl
+
+ReLaTeX will write its output in the same directory as the input.
+
+
+
+
