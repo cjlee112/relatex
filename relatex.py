@@ -123,18 +123,35 @@ def denumber_subsections(t):
     t = re.sub(r'\\subsubsection{', r'\\subsubsection*{', t)
     return t
 
+def cleanup_verbatim(t):
+    'cleanup Sphinx Verbatim environment'
+    t = re.sub(r'\\begin{Verbatim}\[[^]]*]',
+               r'\\begin{verbatim}', t) # use standard env
+    t = re.sub(r'\\end{Verbatim}', r'\\end{verbatim}', t) # use standard env
+    t = re.sub(r'\\PYGZus{}', '_', t) # restore underscores
+    t = re.sub(r'\\PYG{[^}]*}{([^}]+)}', r'\1', t)
+    return t
+
 def cleanup_text(t, denumberSubsections=False):
     t = fmt_equations(t)
     t = cleanup_tables(t)
     t = rm_hrefs(t)
+    t = cleanup_verbatim(t)
     if denumberSubsections:
         t = denumber_subsections(t)
     return t
 
 class SectionDict(dict):
-    def __init__(self, t, fullLatex, tag=r'\section'):
+    def __init__(self, t, fullLatex, tag=r'\section', rename=()):
         'return dict of document sections with section names as keys'
         dict.__init__(self)
+        renameDict = {}
+        for s in rename:
+            names = s.split(':')
+            if len(names) == 2:
+                renameDict[names[0]] = names[1]
+            else:
+                raise ValueError('Bad section rename: ' + s)
         i = 0
         l = []
         name = None
@@ -153,6 +170,10 @@ class SectionDict(dict):
             i += t[i:].index('{') + 1 # find start & end of section name
             j = t[i:].index('}')
             name = t[i:i + j]
+            try:
+                name = renameDict[name]
+            except KeyError:
+                pass
             i += j + 2 # skip past } and newline
         self.order = l # record the original order of the sections
         
@@ -275,7 +296,8 @@ def copy_template_files(templatepath, outpath):
 def reformat_file(paperpath, outpath='out.tex',
                   templatepath='template.tex',
                   affiliations='affiliations.txt',
-                  copyExtraFiles=True, denumberSubsections=False, **kwargs):
+                  copyExtraFiles=True, denumberSubsections=False,
+                  sectionRenames=None, **kwargs):
     'do everything to reformat an input tex file into latex template'
     ifile = open(paperpath) # read source latex from sphinx
     latex = ifile.read()
@@ -288,7 +310,8 @@ def reformat_file(paperpath, outpath='out.tex',
     text = get_text(latex, denumberSubsections)
     text, tables = extract_tables(text)
     text, figures = extract_figures(text)
-    section = SectionDict(text, latex) # extract individual sections
+    section = SectionDict(text, latex,
+                          rename=sectionRenames) # extract individual sections
     bibname = get_bibname(latex)
     authors = get_authors(latex)
     affiliations = read_affiliations(affiliations, authors)
@@ -337,6 +360,10 @@ def get_options():
         '--email', action="store", type="string",
         dest="email", default='please provide an address',
         help="email address of the corresponding author")
+    parser.add_option(
+        '--rename', action="append",
+        dest="sectionRenames", 
+        help='rename one or more sections')
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -359,4 +386,5 @@ if __name__ == '__main__':
                   thebibliography=bbl, bibCount=bibCount,
                   copyExtraFiles=options.copyExtraFiles,
                   denumberSubsections=options.denumberSubsections,
-                  emailAddress=options.email, *args)
+                  emailAddress=options.email,
+                  sectionRenames=options.sectionRenames, *args)
