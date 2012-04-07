@@ -46,4 +46,10 @@ In addition, it accepts the following options:
   require that section numbering be turned off for subsections.
   You can do so using this flag.
 
+* ``--rename OLDNAME:NEWNAME``: you can rename one or more
+  sections in your original
+  document to the names expected by the journal, by specifying a 
+  current section name as OLDNAME, and the name expected by the
+  journal as NEWNAME.
+
 
