@@ -19,15 +19,17 @@ def fmt_equations(t):
     return t
 
 class Figure(object):
-    def __init__(self, imagefile, caption, legend, options=''):
+    def __init__(self, imagefile, caption, legend, options='', label=None):
         self.imagefile = imagefile
         self.caption = caption
         self.legend = legend
         self.options = options
+        self.label = label
 
-def save_figure(t, imageOnly=False):
+def save_figure(t, imageOnly=False, label=None, options=None):
     m = re.search(r'\\includegraphics([^{]*){([^}]+)', t)
-    options = m.group(1)
+    if not options:
+        options = m.group(1)
     imagefile = m.group(2)
     if imageOnly:
         return Figure(imagefile, '', '', options)
@@ -43,9 +45,9 @@ def save_figure(t, imageOnly=False):
     if t[k - 1] == '}': # catch }\end{figure} from sphinx
         k -= 1
     legend = re.sub('\n\n', '\n', t[j + len(tag):k]) # caption cannot contain multiple paragraphs
-    return Figure(imagefile, caption, legend, options)
+    return Figure(imagefile, caption, legend, options, label)
 
-def extract_figures(t, legendsOnly=True):
+def extract_figures(t, legendsOnly=True,  imgoptions=None):
     'remove figures from text; many journals want them inserted at the end'
     t = re.sub(r'\\hypertarget{([^}]+)}{}', '', t)
     #t = re.sub(r'\\includegraphics', r'\\includegraphics[width=5in]', t)
@@ -53,6 +55,12 @@ def extract_figures(t, legendsOnly=True):
     t = re.sub(r'\\caption{\\textbf{(Figure[^}]+)}: ', r'\\caption{', t)
     figures = []
     while True:
+        m = re.search(r'\\phantomsection\\label{([^}]+)}\\begin{figure}', t)
+        if m: # extract label from sphinx wierdness
+            label = m.group(1)
+            t = t[:m.start()] + t[m.end(1) + 1:] # just leave \begin{figure}
+        else:
+            label = None
         i = t.find(r'\begin{figure}') # which tag occurs first?
         start = t.find(r'\includegraphics')
         if i < 0:
@@ -60,11 +68,13 @@ def extract_figures(t, legendsOnly=True):
                 return t, figures # end of figures!!
         elif start < 0 or i < start: # extract normal figure block
             j = t[i:].index(r'\end{figure}') + 12
-            figures.append(save_figure(t[i:i + j]))
+            figures.append(save_figure(t[i:i + j], label=label,
+                                       options=imgoptions))
             t = t[:i] + t[i + j:]
             continue
         j = t[start:].index('}') + 1 # extract bare includegraphics
-        figures.append(save_figure(t[start:start + j], True))
+        figures.append(save_figure(t[start:start + j], imageOnly=True,
+                                   options=imgoptions))
         t = t[:start] + t[start + j:]
     
 
@@ -73,7 +83,7 @@ def cleanup_tables(t):
     t = re.sub(r'\\begin{table}', r'\\begin{table}[!ht]', t)
     lastpos = 0
     s = '' # replace non-standard tabulary env with standard tabular env
-    for m in re.finditer(r'\\begin{tabulary}{\\textwidth}{([^}]+)', t):
+    for m in re.finditer(r'\\begin{tabulary}{[^}]+}{([^}]+)', t):
         s += t[lastpos:m.start()] + r'\begin{tabular}{' + m.group(1).lower()
         lastpos = m.end()
     t = s + t[lastpos:]
@@ -297,7 +307,7 @@ def reformat_file(paperpath, outpath='out.tex',
                   templatepath='template.tex',
                   affiliations='affiliations.txt',
                   copyExtraFiles=True, denumberSubsections=False,
-                  sectionRenames=None, **kwargs):
+                  sectionRenames=(), imgoptions=None, **kwargs):
     'do everything to reformat an input tex file into latex template'
     ifile = open(paperpath) # read source latex from sphinx
     latex = ifile.read()
@@ -309,7 +319,7 @@ def reformat_file(paperpath, outpath='out.tex',
     title = get_title(latex) # extract relevant sections from sphinx
     text = get_text(latex, denumberSubsections)
     text, tables = extract_tables(text)
-    text, figures = extract_figures(text)
+    text, figures = extract_figures(text, imgoptions=imgoptions)
     section = SectionDict(text, latex,
                           rename=sectionRenames) # extract individual sections
     bibname = get_bibname(latex)
@@ -362,8 +372,12 @@ def get_options():
         help="email address of the corresponding author")
     parser.add_option(
         '--rename', action="append",
-        dest="sectionRenames", 
+        dest="sectionRenames", default=[],
         help='rename one or more sections')
+    parser.add_option(
+        '--imgoptions', action="store", type="string",
+        dest="imgoptions", default=None,
+        help="options to use for includegraphics")
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -387,4 +401,5 @@ if __name__ == '__main__':
                   copyExtraFiles=options.copyExtraFiles,
                   denumberSubsections=options.denumberSubsections,
                   emailAddress=options.email,
-                  sectionRenames=options.sectionRenames, *args)
+                  sectionRenames=options.sectionRenames,
+                  imgoptions=options.imgoptions, *args)
