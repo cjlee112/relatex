@@ -130,7 +130,9 @@ $\ast$ E-mail: Corresponding {{ emailAddress }}
 {\bf {{ figure.caption }} }
 {{- figure.legend -}}
 }
-%\label{Figure_label}
+{% if figure.label %}
+\label{ {{- figure.label -}} }
+{%- endif %}
 \end{figure}
 {% endfor %}
 
