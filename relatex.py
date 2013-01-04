@@ -7,6 +7,7 @@ import glob
 import sys
 import optparse
 import shutil
+import codecs
 
 def fmt_equations(t):
     'replace wierd Sphinx equation fmt with standard displaymath'
@@ -290,7 +291,7 @@ def template_fmt(template, title, authors, affiliations,
     return template.render(title=title, authors=authors,
                            affiliations=affiliations, section=section,
                            bibname=bibname, figures=figures, tables=tables,
-                           **kwargs)
+                           len=len, **kwargs)
 
 def copy_template_files(templatepath, outpath):
     'copy additional template files to same directory as the output'
@@ -307,9 +308,10 @@ def reformat_file(paperpath, outpath='out.tex',
                   templatepath='template.tex',
                   affiliations='affiliations.txt',
                   copyExtraFiles=True, denumberSubsections=False,
-                  sectionRenames=(), imgoptions=None, **kwargs):
+                  sectionRenames=(), imgoptions=None,
+                  rmTables=False, rmFigures=False, **kwargs):
     'do everything to reformat an input tex file into latex template'
-    ifile = open(paperpath) # read source latex from sphinx
+    ifile = codecs.open(paperpath, encoding='utf-8') # read source latex from sphinx
     latex = ifile.read()
     ifile.close()
     ifile = open(templatepath) # read latex template
@@ -318,15 +320,21 @@ def reformat_file(paperpath, outpath='out.tex',
 
     title = get_title(latex) # extract relevant sections from sphinx
     text = get_text(latex, denumberSubsections)
-    text, tables = extract_tables(text)
-    text, figures = extract_figures(text, imgoptions=imgoptions)
+    if rmTables:
+        text, tables = extract_tables(text)
+    else:
+        tables = []
+    if rmFigures:
+        text, figures = extract_figures(text, imgoptions=imgoptions)
+    else:
+        figures = []
     section = SectionDict(text, latex,
                           rename=sectionRenames) # extract individual sections
     bibname = get_bibname(latex)
     authors = get_authors(latex)
     affiliations = read_affiliations(affiliations, authors)
 
-    ifile = open(outpath, 'w') # output text inserted into template
+    ifile = codecs.open(outpath, 'w', 'utf-8') # output text inserted into template
     ifile.write(template_fmt(template, title, authors, affiliations,
                              bibname, section, tables, figures, **kwargs))
     ifile.close()
@@ -367,6 +375,14 @@ def get_options():
         dest="denumberSubsections", default=False,
         help='prevent numbering of subsections')
     parser.add_option(
+        '--extract-tables', action="store_true",
+        dest="rmTables", default=False,
+        help='extract tables from main text, for insertion at end')
+    parser.add_option(
+        '--extract-figures', action="store_true",
+        dest="rmFigures", default=False,
+        help='extract figures from main text, for insertion at end')
+    parser.add_option(
         '--email', action="store", type="string",
         dest="email", default='please provide an address',
         help="email address of the corresponding author")
@@ -402,4 +418,6 @@ if __name__ == '__main__':
                   denumberSubsections=options.denumberSubsections,
                   emailAddress=options.email,
                   sectionRenames=options.sectionRenames,
-                  imgoptions=options.imgoptions, *args)
+                  imgoptions=options.imgoptions,
+                  rmTables=options.rmTables,
+                  rmFigures=options.rmFigures, *args)
