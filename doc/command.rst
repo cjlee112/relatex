@@ -26,6 +26,14 @@ info see :doc:`affiliations`.
 
 In addition, it accepts the following options:
 
+* ``--extract-tables``: some templates (e.g. PLOS) require
+  moving all the tables to the end of the paper.  Using
+  this option extract all tables from the main text,
+  and allows the template to insert them at the end of the paper.
+* ``--extract-figures``: some templates (e.g. PLOS) require
+  moving all the figures to the end of the paper.  Using
+  this option extract all figures from the main text,
+  and allows the template to insert them at the end of the paper.
 * ``--bbl BBL-PATH``: some templates (e.g. PNAS) require 
   directly inserting the bibliography into the latex file
   (rather than providing a separate ``.bib`` bibliography database).

@@ -25,7 +25,8 @@ You can easily add new templates for ReLaTeX to use.  The basic process is:
 Examples
 --------
 
-See the example templates in ``templates/pnas`` and ``templates/plos``.
+See the example templates in ``templates/pnas``, ``templates/plos``,
+and ``templates/generic``.
 You can see them in action in :doc:`tutorial`.
 Note that Jinja2 variables are inserted using ``{{ }}`` markers,
 and control structures are inserted using ``{% %}`` markers.
