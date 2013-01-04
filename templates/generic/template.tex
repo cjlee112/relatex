@@ -8,7 +8,7 @@
 % latex plos.template
 % dvipdf plos.template
 
-\documentclass[10pt]{article}
+\documentclass[10pt]{amsart}
 
 % amsmath package, useful for mathematical formulas
 \usepackage{amsmath}
@@ -40,8 +40,6 @@
 % Captions will be left justified
 \usepackage[labelfont=bf,labelsep=period,justification=raggedright]{caption}
 
-% Use the PLoS provided bibtex style
-\bibliographystyle{plos2009}
 
 % Remove brackets from numbering in List of References
 \makeatletter
@@ -63,13 +61,10 @@
 
 \begin{document}
 
-% Title must be 150 characters or less
-\begin{flushleft}
-{\Large
-\textbf{ {{- title -}} }
-}
-% Insert Author names, affiliations and corresponding author email.
-\\
+
+
+\title{ {{- title -}} }
+\author{
 {% for author in authors -%}
    {{ author.name -}}
    $^{ {{- author.get_affiliations() -}} }$
@@ -77,13 +72,15 @@
       ,
    {%- endif %}
 {% endfor -%}
+}
 {%- for aff in affiliations -%}
-\\
-\bf{ {{- aff.id -}} } {{ aff.label }}
+
+\footnotetext[ {{- aff.id -}} ]{ {{ aff.label }} }
 {% endfor -%}
-\\
-$\ast$ E-mail: Corresponding {{ emailAddress }}
-\end{flushleft}
+
+\footnotetext[ {{- len(affiliations) + 1 -}} ]{E-mail: Corresponding {{ emailAddress }} }
+
+\maketitle
 
 % Please keep the abstract between 250 and 300 words
 \begin{abstract}
@@ -104,39 +101,9 @@ $\ast$ E-mail: Corresponding {{ emailAddress }}
 
 %\section*{References}
 % The bibtex filename
+\bibliographystyle{plain}
 \bibliography{ {{- bibname -}} }
 
-\newpage
-\section*{Tables}
-{% for table in tables %}
-\begin{table}[!ht]
-\caption{
-\bf{ {{- table.caption -}} }}
-\begin{tabular}{ {{- table.columnFormats -}} }
-{{ table.tabular }}
-\end{tabular}
-%\begin{flushleft}Table caption
-%\end{flushleft}
-%\label{tab:label}
-\end{table}
-{% endfor %}
-
-\newpage
-\section*{Figures}
-{% for figure in figures %}
-\begin{figure}[!ht]
-\begin{center}
-\includegraphics {{- figure.options -}} { {{- figure.imagefile -}} }
-\end{center}
-\caption{
-{\bf {{ figure.caption }} }
-{{- figure.legend -}}
-}
-{% if figure.label %}
-\label{ {{- figure.label -}} }
-{%- endif %}
-\end{figure}
-{% endfor %}
 
 \end{document}
 
