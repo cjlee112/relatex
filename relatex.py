@@ -143,13 +143,37 @@ def cleanup_verbatim(t):
     t = re.sub(r'\\PYG{[^}]*}{([^}]+)}', r'\1', t)
     return t
 
-def cleanup_text(t, denumberSubsections=False):
+def merge_citations(t, tag):
+    'merge multiple \cite{foo} to a single expression'
+    out = ''
+    while t: # search for strings of multiple \cite{} 
+        o = re.search(r'\\cite\{([^\}]+)\}\s*\\cite\{([^\}]+)\}', t)
+        if o:
+            l = [o.group(1), o.group(2)]
+            out += t[:o.start()]
+            t = t[o.end():]
+            while t:
+                o = re.match(r'\s*\\cite\{([^\}]+)\}', t)
+                if o:
+                    l.append(o.group(1))
+                    t = t[o.end():]
+                else:
+                    break
+            multicite = '%s{%s}' % (tag, ','.join(l))
+            out += multicite
+        else:
+            return out + t
+    return out
+
+def cleanup_text(t, denumberSubsections=False, mergeCitations=False):
     t = fmt_equations(t)
     t = cleanup_tables(t)
     t = rm_hrefs(t)
     t = cleanup_verbatim(t)
     if denumberSubsections:
         t = denumber_subsections(t)
+    if mergeCitations:
+        t = merge_citations(t, mergeCitations)
     return t
 
 class SectionDict(dict):
@@ -229,10 +253,10 @@ def read_bbl(bblpath):
         ifile.close()
     return bbl, bibCount
 
-def get_text(t, denumberSubsections=False):
+def get_text(t, **kwargs):
     i = t.index(r'\section')
     j = t.index(r'\bibliography')
-    return cleanup_text(t[i:j], denumberSubsections)
+    return cleanup_text(t[i:j], **kwargs)
 
 def append_after_tag(tag, t, rep, nskip=0):
     i = t.index(tag) + len(tag)
@@ -322,7 +346,8 @@ def reformat_file(paperpath, outpath='out.tex',
                   affiliations='affiliations.txt',
                   copyExtraFiles=True, denumberSubsections=False,
                   sectionRenames=(), imgoptions=None,
-                  rmTables=False, rmFigures=False, **kwargs):
+                  rmTables=False, rmFigures=False,
+                  mergeCitations=False, **kwargs):
     'do everything to reformat an input tex file into latex template'
     ifile = codecs.open(paperpath, encoding='utf-8') # read source latex from sphinx
     latex = ifile.read()
@@ -332,7 +357,8 @@ def reformat_file(paperpath, outpath='out.tex',
     ifile.close()
 
     title = get_title(latex) # extract relevant sections from sphinx
-    text = get_text(latex, denumberSubsections)
+    text = get_text(latex, denumberSubsections=denumberSubsections,
+                    mergeCitations=mergeCitations)
     if rmTables:
         text, tables = extract_tables(text)
     else:
@@ -408,6 +434,10 @@ def get_options():
         '--imgoptions', action="store", type="string",
         dest="imgoptions", default=None,
         help="options to use for includegraphics")
+    parser.add_option(
+        '--merge-citations', action="store", type="string",
+        dest="mergeCitations", default='',
+        help="tag for merging string of multiple citations")
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -434,4 +464,5 @@ if __name__ == '__main__':
                   sectionRenames=options.sectionRenames,
                   imgoptions=options.imgoptions,
                   rmTables=options.rmTables,
-                  rmFigures=options.rmFigures, *args)
+                  rmFigures=options.rmFigures,
+                  mergeCitations=options.mergeCitations, *args)
