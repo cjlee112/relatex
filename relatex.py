@@ -350,7 +350,8 @@ def reformat_file(paperpath, outpath='out.tex',
                   sectionRenames=(), imgoptions=None,
                   rmTables=False, rmFigures=False,
                   mergeCitations=False,
-                  removeHREFs=True, **kwargs):
+                  removeHREFs=True,
+                  resubs=(), **kwargs):
     'do everything to reformat an input tex file into latex template'
     ifile = codecs.open(paperpath, encoding='utf-8') # read source latex from sphinx
     latex = ifile.read()
@@ -362,6 +363,10 @@ def reformat_file(paperpath, outpath='out.tex',
     title = get_title(latex) # extract relevant sections from sphinx
     text = get_text(latex, denumberSubsections=denumberSubsections,
                     mergeCitations=mergeCitations, removeHREFs=removeHREFs)
+    for resub in resubs: # apply global replacements
+        splitchar = resub[0]
+        pattern, replace = resub[1:].split(splitchar)
+        text = re.sub(pattern, replace, text)
     if rmTables:
         text, tables = extract_tables(text)
     else:
@@ -449,6 +454,10 @@ def get_options():
         '--keep-hrefs', action="store_false",
         dest="removeHREFs", default=True,
         help='preserve \\hrefs{} in latex')
+    parser.add_option(
+        '--replace', action="append",
+        dest="resubs", default=[],
+        help='apply one or more global RE substitutions')
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -477,4 +486,5 @@ if __name__ == '__main__':
                   rmTables=options.rmTables,
                   rmFigures=options.rmFigures,
                   mergeCitations=options.mergeCitations,
-                  removeHREFs=options.removeHREFs, *args)
+                  removeHREFs=options.removeHREFs,
+                  resubs=options.resubs, *args)
