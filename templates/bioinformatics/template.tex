@@ -5,8 +5,8 @@
 \begin{document}
 \firstpage{1}
 
-\title[short Title]{ {{- title -}} }
-\author[Sample \textit{et~al}]{
+\title[ {{- shortTitle -}} ]{ {{- title -}} }
+\author[ {{- shortAuthors -}} ]{
 {% for author in authors -%}
    {{- author.name -}} \,$^{ {{- author.get_affiliations() -}} }$
    {{- author.get_marker('corresponding', '\\footnote{to whom correspondence should be addressed}') -}}
@@ -57,9 +57,11 @@
 
 \section*{Acknowledgement}
 
+{% if 'Acknowledgements' in section %}
 {{ section['Acknowledgements'] }}
+{% endif %}
 
-\paragraph{Funding\textcolon} Text Text Text Text Text Text  Text Text.
+\paragraph{Funding\textcolon} {{ fundingText }}
 
 \bibliographystyle{natbib}
 \bibliography{ {{- bibname -}} }
