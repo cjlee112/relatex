@@ -165,10 +165,12 @@ def merge_citations(t, tag):
             return out + t
     return out
 
-def cleanup_text(t, denumberSubsections=False, mergeCitations=False):
+def cleanup_text(t, denumberSubsections=False, mergeCitations=False,
+                 removeHREFs=True):
     t = fmt_equations(t)
     t = cleanup_tables(t)
-    t = rm_hrefs(t)
+    if removeHREFs:
+        t = rm_hrefs(t)
     t = cleanup_verbatim(t)
     if denumberSubsections:
         t = denumber_subsections(t)
@@ -347,7 +349,8 @@ def reformat_file(paperpath, outpath='out.tex',
                   copyExtraFiles=True, denumberSubsections=False,
                   sectionRenames=(), imgoptions=None,
                   rmTables=False, rmFigures=False,
-                  mergeCitations=False, **kwargs):
+                  mergeCitations=False,
+                  removeHREFs=True, **kwargs):
     'do everything to reformat an input tex file into latex template'
     ifile = codecs.open(paperpath, encoding='utf-8') # read source latex from sphinx
     latex = ifile.read()
@@ -358,7 +361,7 @@ def reformat_file(paperpath, outpath='out.tex',
 
     title = get_title(latex) # extract relevant sections from sphinx
     text = get_text(latex, denumberSubsections=denumberSubsections,
-                    mergeCitations=mergeCitations)
+                    mergeCitations=mergeCitations, removeHREFs=removeHREFs)
     if rmTables:
         text, tables = extract_tables(text)
     else:
@@ -438,6 +441,10 @@ def get_options():
         '--merge-citations', action="store", type="string",
         dest="mergeCitations", default='',
         help="tag for merging string of multiple citations")
+    parser.add_option(
+        '--keep-hrefs', action="store_false",
+        dest="removeHREFs", default=True,
+        help='preserve \\hrefs{} in latex')
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -465,4 +472,5 @@ if __name__ == '__main__':
                   imgoptions=options.imgoptions,
                   rmTables=options.rmTables,
                   rmFigures=options.rmFigures,
-                  mergeCitations=options.mergeCitations, *args)
+                  mergeCitations=options.mergeCitations,
+                  removeHREFs=options.removeHREFs, *args)
