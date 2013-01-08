@@ -460,6 +460,10 @@ def get_options():
         '--replace', action="append",
         dest="resubs", default=[],
         help='apply one or more global RE substitutions')
+    parser.add_option(
+        '--param', action="append",
+        dest="params", default=[],
+        help='pass one or more key=value parameters to output template')
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -476,6 +480,11 @@ if __name__ == '__main__':
         bbl,bibCount = read_bbl(options.bbl)
     else:
         bbl = bibCount = None
+    kwargs = {}
+    if options.params: # build kwargs dict
+        for s in options.params:
+            k = s.split('=')[0]
+            kwargs[k] = s[len(k) + 1:]
     outpath = default_outfile(paperpath, templateName)
     print 'writing output to', outpath
     reformat_file(paperpath, outpath, templatePath,
@@ -489,4 +498,4 @@ if __name__ == '__main__':
                   rmFigures=options.rmFigures,
                   mergeCitations=options.mergeCitations,
                   removeHREFs=options.removeHREFs,
-                  resubs=options.resubs, *args)
+                  resubs=options.resubs, *args, **kwargs)
