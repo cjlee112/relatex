@@ -302,7 +302,11 @@ class Affiliation(object):
         self.alreadyPrinted = False
 
 def read_affiliations(filename, authors):
-    ifile = open(filename)
+    try:
+        ifile = open(filename)
+    except IOError:
+        raise IOError('You must supply affiliations file; could not open '
+                      + filename)
     l = []
     try:
         for i,line in enumerate(ifile):
