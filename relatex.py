@@ -370,6 +370,10 @@ def reformat_file(paperpath, outpath='out.tex',
         text, figures = extract_figures(text, imgoptions=imgoptions)
     else:
         figures = []
+        if imgoptions is not None: # directly replace image options
+            text = re.sub(r'\\includegraphics([^{]*){([^}]+)',
+                          r'\includegraphics[%s]{\2}' % imgoptions, text)
+
     section = SectionDict(text, latex,
                           rename=sectionRenames) # extract individual sections
     bibname = get_bibname(latex)
