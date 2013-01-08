@@ -262,6 +262,12 @@ class Author(object):
         else:
             l = [key[aff.id - 1] for aff in self.affiliations]
         return linker.join(l)
+
+    def get_marker(self, role, label):
+        if getattr(self, role, False):
+            return label
+        else:
+            return ''
             
 class Affiliation(object):
     def __init__(self, id, label):
@@ -275,6 +281,13 @@ def read_affiliations(filename, authors):
     try:
         for i,line in enumerate(ifile):
             t = line.strip().split('\t')
+            if t[0].startswith('role:'):
+                role = t[0][5:]
+                for au in t[1:]:
+                    for author in authors:
+                        if au in author.name:
+                            setattr(author, role, True)
+                continue
             aff = Affiliation(i + 1, t[0])
             for au in t[1:]:
                 for author in authors:
@@ -351,10 +364,11 @@ def default_infile(dirs=('_build/latex', 'build/latex')):
     for dirpath in dirs:
         if os.path.isdir(dirpath):
             l = glob.glob(os.path.join(dirpath, '*.tex'))
-            break
-    if len(l) != 1:
-        raise ValueError('did not find unique latex source file: ' + str(l))
-    return l[0]
+            if len(l) != 1:
+                raise ValueError('did not find unique latex source file: '
+                                 + str(l))
+            return l[0]
+    raise ValueError('No latex file specified and no sphinx build dir found!')
 
 def default_template(templateName, filename='template.tex'):
     return os.path.join(sys.path[0], 'templates', templateName, filename)
