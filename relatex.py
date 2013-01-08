@@ -375,6 +375,8 @@ def reformat_file(paperpath, outpath='out.tex',
         text, figures = extract_figures(text, imgoptions=imgoptions)
     else:
         figures = []
+        text = re.sub(r'\\caption{\\textbf{(Figure[^}]+)}: ', r'\\caption{',
+                      text) # rm hardcoded Fig numbers required by Sphinx
         if imgoptions is not None: # directly replace image options
             text = re.sub(r'\\includegraphics([^{]*){([^}]+)',
                           r'\includegraphics[%s]{\2}' % imgoptions, text)
