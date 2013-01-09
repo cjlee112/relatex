@@ -1,5 +1,17 @@
-simple rewriter for converting Sphinx latex output to different latex
-templates.
+ReLaTeX
+=======
+
+ReLaTeX is a simple tool for 're-templating' LaTeX documents,
+e.g. into the LaTeX template mandated by a specific journal.
+It extracts sections, tables, figures, author and affiliation
+info, and uses a powerful but simple template system to
+make it easy to 'inject' whatever specific pieces needed into
+the journal's template.  It gives you flexible control over
+many aspects of the LaTeX output, such as the figure options,
+renaming and reordering of sections, bibliography injection,
+etc.  It also works well for converting Sphinx latex output
+(from ReStructuredText input) to whatever journal LaTeX
+template you wish.
 
 Examples
 --------
