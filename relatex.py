@@ -165,6 +165,18 @@ def merge_citations(t, tag):
             return out + t
     return out
 
+def list_citations(t):
+    'return a list of all the citation IDs'
+    l = []
+    while t: # search for all \cite{} instances
+        o = re.search(r'\\cite\{([^\}]+)\}', t)
+        if o:
+            l.append(o.group(1))
+            t = t[o.end():]
+        else:
+            break
+    return l
+
 def cleanup_text(t, denumberSubsections=False, mergeCitations=False,
                  removeHREFs=True):
     t = fmt_equations(t)
