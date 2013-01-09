@@ -63,7 +63,14 @@
 
 \paragraph{Funding\textcolon} {{ fundingText }}
 
+{% if thebibliography %}
+\begin{thebibliography}{}
+{{ thebibliography }}
+
+\end{thebibliography}
+{% else %}
 \bibliographystyle{natbib}
 \bibliography{ {{- bibname -}} }
+{% endif %}
 
 \end{document}
