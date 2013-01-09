@@ -426,12 +426,23 @@ def default_infile(dirs=('_build/latex', 'build/latex')):
             return l[0]
     raise ValueError('No latex file specified and no sphinx build dir found!')
 
-def default_template(templateName, filename='template.tex'):
-    return os.path.join(sys.path[0], 'templates', templateName, filename)
+def get_template(templateName, filename='template.tex'):
+    'get template path and name, trying several possible locations'
+    if os.path.isfile(templateName): # treat as path to template file
+        return (templateName,
+                os.path.basename(os.path.dirname(templateName)))
+    templatePath = os.path.join(templateName, filename)
+    if os.path.isfile(templatePath): # treat as path to template dir
+        return (templatePath, os.path.basename(templateName))
+    templatePath = os.path.join(sys.path[0], 'templates', templateName,
+                                filename)
+    if os.path.isfile(templatePath): # treat as template name
+        return (templatePath, templateName)
+    raise IOError('No template file found: ' + templateName)
 
 
 def get_options():
-    parser = optparse.OptionParser()
+    parser = optparse.OptionParser('%prog TEMPLATE INPUTPATH [options]')
     parser.add_option(
         '--bbl', action="store", type="string",
         dest="bbl", 
@@ -486,7 +497,7 @@ if __name__ == '__main__':
     options, args = get_options()
     templateName = args[0]
     args = args[1:]
-    templatePath = default_template(templateName)
+    templatePath, templateName = get_template(templateName)
     try:
         paperpath = args[0]
         args = args[1:]

@@ -7,15 +7,27 @@ ReLaTeX Command-line Options
 
 ReLaTeX requires two command-line arguments::
 
-  relatex.py TEMPLATENAME INPUT-PATH [OPTIONS]
+  relatex.py TEMPLATE INPUT-PATH [OPTIONS]
 
-* **template name**: This should be the name of a directory
-  inside the relatex/templates directory.
+* **template**: This should be either
 
-* **input latex file path**
+  * the name of a directory inside the ``relatex/templates``
+    directory, e.g. ``plos``.  This only works if you
+    are running ``relatex.py`` directly from the ``relatex``
+    source directory.
+  * the path to your desired template file,
+    e.g. ``/path/to/templates/plos/template.tex``.
+    In this case, the name of the directory in which the
+    file is located (``plos``) will be taken as the 
+    template name.
+  * the path to your desired template directory, e.g.
+    ``/path/to/templates/plos``, which must contain
+    a ``templates.tex`` template file.
+
+* **input latex file path**: path to the LaTeX file to read.
 
 Note: by default ReLaTeX writes its output latex file to 
-the same directory as your input latex file, with the
+the current directory, with the
 template name appended to its file prefix, i.e. running
 the ``pnas`` template on a ``test.tex``
 input file will generate a ``test_pnas.tex`` output file.
