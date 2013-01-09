@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 2
 
    tutorial
+   install
    command
    affiliations
    templating
