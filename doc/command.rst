@@ -60,4 +60,30 @@ In addition, it accepts the following options:
   current section name as OLDNAME, and the name expected by the
   journal as NEWNAME.
 
+* ``--imageoptions IMAGEOPTIONS``: forces ``\includegraphics``
+  to use IMAGEOPTIONS as its optional arguments, i.e. in the
+  form ``\includegraphics[IMAGEOPTIONS]``.
 
+* ``--merge-citations TAG``: merges any string of
+  ``\cite{CITE1} \cite{CITE2}...``
+  to be combined in a single expression of the form
+  ``TAG{CITE1,CITE2...}``.
+
+* ``--keep-hrefs``: forces relatex to preserve ``\href{}``
+  links; by default it strips them, since many journal templates
+  do not allow them.
+
+* ``--replace :PATTERN:SUB``: perform global substitution of
+  the regular expression ``PATTERN`` to replace it with the
+  regular expression ``SUB``; you can use subgroup values in 
+  ``SUB`` such as ``\1,\2`` etc.  Note that you can specify any
+  separator character you want as the first character of the
+  argument string; in the example above it is given as :
+  (i.e. a colon).
+
+* ``--param KEY=VALUE``: pass the specified keyword arguments
+  to the Jinja2 template, to use as it desires.
+
+An example::
+
+  python /path/to/relatex.py bioinformatics mypaper.tex --email leec@chem.ucla.edu --merge-citations '\citep' --keep-hrefs --imgoptions 'width=9cm' --replace ':\\cite\{:\citep{' --replace ':\\code\{([^}]+)\}:\1' --param shortTitle=Phenoseq --param fundingText='DOE grant DE-FC02-02ER63421' --param shortAuthors='Lee \& Harper'

@@ -41,6 +41,9 @@ your template:
 Content variables
 .................
 
+* any keyword parameter(s) passed by the ``--param`` command line 
+  option.
+
 * **title**: inserts the document title
 
 * **section**: is a dictionary of the named sections in the paper,
@@ -56,8 +59,9 @@ Content variables
   construct, its content will be added to this dictionary as
   the section named ``Abstract``.
 
-* **figures**: a list of figure objects, each with the following
-  attributes:
+* **figures**: if ``--extract-figures`` was specified,
+  a list of figure objects, each with the following
+  attributes.  Otherwise it's an empty list.
 
   * **imagefile**: file name of the image file.
 
@@ -68,8 +72,9 @@ Content variables
 
   * **legend**: the text legend associated with this figure.
 
-* **tables**: a list of table objects, each with the following
-  attributes:
+* **tables**: if ``--extract-figures`` was specified,
+  a list of table objects, each with the following
+  attributes.  Otherwise it's an empty list.
 
   * **tabular**: the content of the table itself (i.e. the content
     of its ``tabular`` environment.
@@ -107,6 +112,10 @@ Author and Affiliation variables
     first affiliation, etc.).
 
     *linker* is the string used for joining the list of affiliations.
+
+  * **get_marker(role, label)**: returns the string specified by
+    **label** if the author has the specified **role**, otherwise
+    an empty string.
 
 * **emailAddress**: inserts the corresponding author's email address,
   provided by the ``--email`` option.
