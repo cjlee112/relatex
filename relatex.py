@@ -48,6 +48,15 @@ def save_figure(t, imageOnly=False, label=None, options=None):
     legend = re.sub('\n\n', '\n', t[j + len(tag):k]) # caption cannot contain multiple paragraphs
     return Figure(imagefile, caption, legend, options, label)
 
+def extract_macros(t, start='%BEGINMACROS', end='%ENDMACROS'):
+    'get macros from latex for optional insertion into template'
+    try:
+        i = t.index(start)
+    except ValueError:
+        return ''
+    j = t.index(end, i)
+    return t[i:j]
+
 def extract_figures(t, legendsOnly=True,  imgoptions=None):
     'remove figures from text; many journals want them inserted at the end'
     t = re.sub(r'\\hypertarget{([^}]+)}{}', '', t)
@@ -251,7 +260,7 @@ def get_bibname(t):
     return re.search(r'\\bibliography\{([^}]+)', t).group(1)
 
 def read_bbl(bblpath):
-    ifile = open(bblpath)
+    ifile = codecs.open(bblpath, encoding='utf-8')
     inBib = False
     bbl = ''
     try:
@@ -367,7 +376,7 @@ def reformat_file(paperpath, outpath='out.tex',
                   rmTables=False, rmFigures=False,
                   mergeCitations=False,
                   removeHREFs=True,
-                  resubs=(), **kwargs):
+                  resubs=(), title=None, authors=None, **kwargs):
     'do everything to reformat an input tex file into latex template'
     ifile = codecs.open(paperpath, encoding='utf-8') # read source latex from sphinx
     latex = ifile.read()
@@ -376,7 +385,9 @@ def reformat_file(paperpath, outpath='out.tex',
     template = Template(ifile.read())
     ifile.close()
 
-    title = get_title(latex) # extract relevant sections from sphinx
+    macroDefs = extract_macros(latex)
+    if not title: # extract relevant sections from sphinx
+        title = get_title(latex)
     text = get_text(latex, denumberSubsections=denumberSubsections,
                     mergeCitations=mergeCitations, removeHREFs=removeHREFs)
     for resub in resubs: # apply global replacements
@@ -400,12 +411,19 @@ def reformat_file(paperpath, outpath='out.tex',
     section = SectionDict(text, latex,
                           rename=sectionRenames) # extract individual sections
     bibname = get_bibname(latex)
-    authors = get_authors(latex)
+    if authors:
+        l = []
+        for name in authors.split(','):
+            l.append(Author(name))
+        authors = l
+    else:
+        authors = get_authors(latex)
     affiliations = read_affiliations(affiliations, authors)
 
     ifile = codecs.open(outpath, 'w', 'utf-8') # output text inserted into template
     ifile.write(template_fmt(template, title, authors, affiliations,
-                             bibname, section, tables, figures, **kwargs))
+                             bibname, section, tables, figures,
+                             macroDefs=macroDefs, **kwargs))
     ifile.close()
     if copyExtraFiles: # copy extra template files to output directory
         copy_template_files(templatepath, outpath)
@@ -491,6 +509,14 @@ def get_options():
         '--param', action="append",
         dest="params", default=[],
         help='pass one or more key=value parameters to output template')
+    parser.add_option(
+        '--title', action="store", type="string",
+        dest="title", default=None,
+        help="paper title")
+    parser.add_option(
+        '--authors', action="store", type="string",
+        dest="authors", default=None,
+        help="comma-separated author list")
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -525,4 +551,6 @@ if __name__ == '__main__':
                   rmFigures=options.rmFigures,
                   mergeCitations=options.mergeCitations,
                   removeHREFs=options.removeHREFs,
-                  resubs=options.resubs, *args, **kwargs)
+                  resubs=options.resubs, 
+                  title=options.title, 
+                  authors=options.authors, *args, **kwargs)
