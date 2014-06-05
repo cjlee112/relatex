@@ -53,6 +53,14 @@ In addition, it accepts the following options:
   the path to a ``.bbl`` file for your input paper (this is
   generated automatically when you run ``bibtex`` on your input paper).
 
+* ``--title "My Amazing Paper Title"``: override the default 
+  title searching mechanism (which looks for ``\title{...}``)
+  by explicitly providing the paper title.
+
+* ``--authors "Adam Smith,Karl Marx,Charles Darwin"``: override the default
+  author searching mechanism (which looks for ``\author{...}``)
+  by explicitly providing the paper authors as a comma-separated string.
+
 * ``--email ADDRESS``: provide an email address for the corresponding
   author, used by some templates.
 

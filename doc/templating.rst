@@ -140,4 +140,19 @@ Bibliography variables
 * **thebibliography**: inserts the bibliography obtained from
   a ``.bbl`` file supplied via the ``--bbl`` option.
 
+LaTeX macros etc.
+..................
+
+* **macroDefs**: inserts macros defined by the input latex file,
+  which must be marked BY starting with the line ``%BEGINMACROS`` and
+  ending the line ``%ENDMACROS``, e.g.::
+
+    %BEGINMACROS
+    \newcommand{\ip}{\ensuremath{\text{IP}_0}\xspace}
+    \newcommand{\zdx}{\ensuremath{\text{ZD}_{\chi}}\xspace}
+    \newcommand{\zdr}{\ensuremath{\text{ZDR}}\xspace}
+    \newcommand{\zdt}{\ensuremath{\text{ZD}_t}\xspace}
+    \newcommand{\mars}{\ensuremath{\text{MaRS}^{*}}\xspace}
+    %ENDMACROS
+
 

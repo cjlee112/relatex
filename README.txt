@@ -50,7 +50,14 @@ that the PNAS template requires (PNAS requires that the bibliography
 actually be inserted into the latex document itself; relatex
 does this for you).
 
-For PLoS::
+If you want to insert a different title or author list than
+is present in the input file (or if ``relatex`` isn't successfully
+finding your title or author list) you can specify them on the
+command line using the ``--title`` or ``--authors`` options, e.g.::
+
+  python ../relatex.py pnas test.tex --bbl multihit.bbl --title 'The Art of War: Beyond Memory-one Strategies in Population Games'
+
+Here's another template example, for PLoS::
 
   python ../relatex.py plos test.tex --no-subsection-numbers --email leec@chem.ucla.edu
 
