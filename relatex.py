@@ -244,10 +244,18 @@ class SectionDict(dict):
         
 
 def get_title(t):
-    return re.search(r'\\title\{([^}]+)', t).group(1)
+    'extract title or raise error if not found'
+    try:
+        return re.search(r'\\title\{([^}]+)', t).group(1)
+    except AttributeError:
+        raise ValueError(r'\title{} not found in document.  Please use the --title option to specify your paper title')
 
 def get_authors(t):
-    names = re.search(r'\\author\{([^}]+)', t).group(1).split(',')
+    'extract author names or raise error if not found'
+    try:
+        names = re.search(r'\\author\{([^}]+)', t).group(1).split(',')
+    except AttributeError:
+        raise ValueError(r'\author{} not found in document.  Please use the --authors option to specify your paper title')
     l = []
     for name in names:
         name = name.strip()
