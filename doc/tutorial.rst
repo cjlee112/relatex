@@ -122,6 +122,31 @@ You then generate PDFs from the resulting ``test_pnas.tex`` and
 Using ReLaTeX with Sphinx
 -------------------------
 
+Sphinx configuration: to handle ``cite`` and ``bibliography``
+reStructured text commands properly
+(generating latex ``\cite`` and ``\bibliography`` output),
+you must use the ``bibcite`` Sphinx extension, which you can
+obtain from https://bitbucket.org/foobaron/bibcite.
+
+* install (or link) ``bibcite.py`` in your ``sphinx-ext`` directory.
+* edit your Sphinx ``conf.py`` config file to
+  ensure that ``sphinx-ext`` is added to the Python path,
+  and that ``bibcite`` is added to Sphinx's imports, e.g.::
+
+    # If extensions (or modules to document with autodoc) are in another directory,
+    # add these directories to sys.path here. If the directory is relative to the
+    # documentation root, use os.path.abspath to make it absolute, like shown here.
+    sys.path.append(os.path.abspath('sphinx-ext'))
+
+    # -- General configuration -----------------------------------------------------
+
+    # Add any Sphinx extension module names here, as strings. They can be extensions
+    # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
+    extensions = ['sphinx.ext.jsmath', 'bibcite']
+
+
+
+
 We recommend you use the ``howto`` Sphinx document style 
 (instead of the ``manual`` style, which is more appropriate
 for a book format rather than an article format).  
