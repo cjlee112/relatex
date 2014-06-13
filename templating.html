@@ -1,0 +1,266 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Adding Templates to ReLaTeX &mdash; ReLaTeX 0.3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ReLaTeX 0.3 documentation" href="index.html" />
+    <link rel="prev" title="Specifying Institutional Affiliations and Authorship Roles" href="affiliations.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="affiliations.html" title="Specifying Institutional Affiliations and Authorship Roles"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">ReLaTeX 0.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="adding-templates-to-relatex">
+<h1>Adding Templates to ReLaTeX<a class="headerlink" href="#adding-templates-to-relatex" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>You can easily add new templates for ReLaTeX to use.  The basic process is:</p>
+<ul class="simple">
+<li>You take an existing latex file you want to use as a template.
+For example, this might be the official latex template provided
+by a scientific journal that you want to submit a paper to.
+You add this to ReLaTeX by simply copying it to
+<tt class="docutils literal"><span class="pre">relatex/templates/TEMPLATENAME/template.tex</span></tt>,
+where <tt class="docutils literal"><span class="pre">TEMPLATENAME</span></tt> is the name you wish to assign to this
+template.  You should also copy any additional files required
+for this template to work (such as <tt class="docutils literal"><span class="pre">.sty</span></tt> or <tt class="docutils literal"><span class="pre">.cls</span></tt> files),
+to that directory.</li>
+<li>You add <a class="reference external" href="http://jinja.pocoo.org/">Jinja2</a>
+code to the <tt class="docutils literal"><span class="pre">template.tex</span></tt> template file, telling ReLaTeX
+what content to insert in different parts of the template.</li>
+</ul>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p>See the example templates in <tt class="docutils literal"><span class="pre">templates/pnas</span></tt>, <tt class="docutils literal"><span class="pre">templates/plos</span></tt>,
+and <tt class="docutils literal"><span class="pre">templates/generic</span></tt>.
+You can see them in action in <a class="reference internal" href="tutorial.html"><em>Basic ReLaTeX Tutorial</em></a>.
+Note that Jinja2 variables are inserted using <tt class="docutils literal"><span class="pre">{{</span> <span class="pre">}}</span></tt> markers,
+and control structures are inserted using <tt class="docutils literal"><span class="pre">{%</span> <span class="pre">%}</span></tt> markers.</p>
+</div>
+<div class="section" id="relatex-content-variables">
+<h2>ReLaTeX Content Variables<a class="headerlink" href="#relatex-content-variables" title="Permalink to this headline">¶</a></h2>
+<p>ReLaTeX provides the following variables for insertion anywhere within
+your template:</p>
+<div class="section" id="content-variables">
+<h3>Content variables<a class="headerlink" href="#content-variables" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p class="first">any keyword parameter(s) passed by the <tt class="docutils literal"><span class="pre">--param</span></tt> command line
+option.</p>
+</li>
+<li><p class="first"><strong>title</strong>: inserts the document title</p>
+</li>
+<li><p class="first"><strong>section</strong>: is a dictionary of the named sections in the paper,
+whose keys are section names, and whose associated values
+are the latex content of that section.  It also provides the
+following attribute:</p>
+<ul class="simple">
+<li><strong>order</strong>: a list of section names, in the order they appeared
+in the input latex file.</li>
+</ul>
+<p>Note that if your input latex file uses the
+<tt class="docutils literal"><span class="pre">\begin{abstract}...\end{abstract}</span></tt>
+construct, its content will be added to this dictionary as
+the section named <tt class="docutils literal"><span class="pre">Abstract</span></tt>.</p>
+</li>
+<li><p class="first"><strong>figures</strong>: if <tt class="docutils literal"><span class="pre">--extract-figures</span></tt> was specified,
+a list of figure objects, each with the following
+attributes.  Otherwise it&#8217;s an empty list.</p>
+<ul class="simple">
+<li><strong>imagefile</strong>: file name of the image file.</li>
+<li><strong>caption</strong>: the figure caption</li>
+<li><strong>options</strong>: the latex <tt class="docutils literal"><span class="pre">\begin{figure}</span></tt> options provided
+in the input latex file for this figure, if any.</li>
+<li><strong>legend</strong>: the text legend associated with this figure.</li>
+</ul>
+</li>
+<li><p class="first"><strong>tables</strong>: if <tt class="docutils literal"><span class="pre">--extract-figures</span></tt> was specified,
+a list of table objects, each with the following
+attributes.  Otherwise it&#8217;s an empty list.</p>
+<ul class="simple">
+<li><strong>tabular</strong>: the content of the table itself (i.e. the content
+of its <tt class="docutils literal"><span class="pre">tabular</span></tt> environment.</li>
+<li><strong>columnFormats</strong>: the list of format specification for the set of
+columns, provided in the input latex file for this figure.</li>
+<li><strong>legend</strong>: the text legend associated with this table.</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="author-and-affiliation-variables">
+<h3>Author and Affiliation variables<a class="headerlink" href="#author-and-affiliation-variables" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p class="first"><strong>authors</strong>: a list of author objects, each with the following
+attributes:</p>
+<ul>
+<li><p class="first"><strong>name</strong>: the Author Name as provided in the input latex file&#8217;s
+<tt class="docutils literal"><span class="pre">\author{}</span></tt> list.</p>
+</li>
+<li><p class="first"><strong>get_affiliations(fmt=None, key=None, linker=&#8217;,&#8217;)</strong>: returns a
+string providing a formatted list of affiliations for this author.</p>
+<p><em>fmt</em>, if provided, will be used as a Python format string which
+can contain any of the following fields:
+<tt class="docutils literal"><span class="pre">%(id)s</span></tt>: inserts the number of the affiliation (starting from 1);
+<tt class="docutils literal"><span class="pre">%(key)s</span></tt>: inserts the key character of the affiliation,
+obtained from the optional key character string <tt class="docutils literal"><span class="pre">key</span></tt> argument.
+<tt class="docutils literal"><span class="pre">%(label)s</span></tt>: inserts the affiliation string from the
+<tt class="docutils literal"><span class="pre">affiliations.txt</span></tt> file for this affiliation.
+<tt class="docutils literal"><span class="pre">%(labelOnce)s</span></tt>: same as <tt class="docutils literal"><span class="pre">%(label)s</span></tt>, except that it will
+insert an empty string on subsequent re-usages of the same
+affiliation (required by some journal formats).</p>
+<p><em>key</em>, if provided is a string of characters to use for
+each affiliation (i.e. the first character is used for the
+first affiliation, etc.).</p>
+<p><em>linker</em> is the string used for joining the list of affiliations.</p>
+</li>
+<li><p class="first"><strong>get_marker(role, label)</strong>: returns the string specified by
+<strong>label</strong> if the author has the specified <strong>role</strong>, otherwise
+an empty string.</p>
+</li>
+</ul>
+</li>
+<li><p class="first"><strong>emailAddress</strong>: inserts the corresponding author&#8217;s email address,
+provided by the <tt class="docutils literal"><span class="pre">--email</span></tt> option.</p>
+</li>
+<li><p class="first"><strong>affiliations</strong>: a list of affiliation objects, each with the
+following attributes:</p>
+<ul class="simple">
+<li><strong>id</strong>: the number of the affiliation (starting at 1).</li>
+<li><strong>label</strong>: the affiliation string from the
+<tt class="docutils literal"><span class="pre">affiliations.txt</span></tt> file for this affiliation.</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="bibliography-variables">
+<h3>Bibliography variables<a class="headerlink" href="#bibliography-variables" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><strong>bibname</strong>: name of the bibliography file (i.e. <tt class="docutils literal"><span class="pre">.bib</span></tt> file
+name without the <tt class="docutils literal"><span class="pre">.bib</span></tt> suffix).</li>
+<li><strong>bibCount</strong>: inserts the largest bibliography number from
+the <tt class="docutils literal"><span class="pre">.bbl</span></tt> file supplied via the <tt class="docutils literal"><span class="pre">--bbl</span></tt> option.</li>
+<li><strong>thebibliography</strong>: inserts the bibliography obtained from
+a <tt class="docutils literal"><span class="pre">.bbl</span></tt> file supplied via the <tt class="docutils literal"><span class="pre">--bbl</span></tt> option.</li>
+</ul>
+</div>
+<div class="section" id="latex-macros-etc">
+<h3>LaTeX macros etc.<a class="headerlink" href="#latex-macros-etc" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p class="first"><strong>macroDefs</strong>: inserts macros defined by the input latex file,
+which must be marked BY starting with the line <tt class="docutils literal"><span class="pre">%BEGINMACROS</span></tt> and
+ending the line <tt class="docutils literal"><span class="pre">%ENDMACROS</span></tt>, e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre>%BEGINMACROS
+\newcommand{\ip}{\ensuremath{\text{IP}_0}\xspace}
+\newcommand{\zdx}{\ensuremath{\text{ZD}_{\chi}}\xspace}
+\newcommand{\zdr}{\ensuremath{\text{ZDR}}\xspace}
+\newcommand{\zdt}{\ensuremath{\text{ZD}_t}\xspace}
+\newcommand{\mars}{\ensuremath{\text{MaRS}^{*}}\xspace}
+%ENDMACROS
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Adding Templates to ReLaTeX</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+<li><a class="reference internal" href="#relatex-content-variables">ReLaTeX Content Variables</a><ul>
+<li><a class="reference internal" href="#content-variables">Content variables</a></li>
+<li><a class="reference internal" href="#author-and-affiliation-variables">Author and Affiliation variables</a></li>
+<li><a class="reference internal" href="#bibliography-variables">Bibliography variables</a></li>
+<li><a class="reference internal" href="#latex-macros-etc">LaTeX macros etc.</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="affiliations.html"
+                        title="previous chapter">Specifying Institutional Affiliations and Authorship Roles</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/templating.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="affiliations.html" title="Specifying Institutional Affiliations and Authorship Roles"
+             >previous</a> |</li>
+        <li><a href="index.html">ReLaTeX 0.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Christopher Lee.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installing ReLaTeX &mdash; ReLaTeX 0.3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ReLaTeX 0.3 documentation" href="index.html" />
+    <link rel="next" title="ReLaTeX Command-line Options" href="command.html" />
+    <link rel="prev" title="Basic ReLaTeX Tutorial" href="tutorial.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="command.html" title="ReLaTeX Command-line Options"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Basic ReLaTeX Tutorial"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">ReLaTeX 0.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="installing-relatex">
+<h1>Installing ReLaTeX<a class="headerlink" href="#installing-relatex" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="obtaining-relatex">
+<h2>Obtaining ReLaTeX<a class="headerlink" href="#obtaining-relatex" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>You can either download the latest release of ReLaTeX from its
+GitHub <a class="reference external" href="https://github.com/cjlee112/relatex/tags">downloads</a> page;</li>
+<li>or you can get the very latest code commits using Git, directly
+from the ReLaTeX&#8217;s <a class="reference external" href="https://github.com/cjlee112/relatex">GitHub</a> page.
+(This requires using <a class="reference external" href="http://git-scm.com">Git</a>).</li>
+</ul>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>ReLaTeX is a pure Python package; you need
+<a class="reference external" href="http://python.org">Python</a> to run it.
+You can either just run the downloaded <tt class="docutils literal"><span class="pre">relatex.py</span></tt> script
+directly (no install step required), or you can run its
+<tt class="docutils literal"><span class="pre">setup.py</span></tt> script to install it on your system.  Both options
+have advantages and disadvantages:</p>
+<div class="section" id="option-1-running-relatex-py-directly-no-install-step-required">
+<h3>Option 1: Running relatex.py directly (no install step required)<a class="headerlink" href="#option-1-running-relatex-py-directly-no-install-step-required" title="Permalink to this headline">¶</a></h3>
+<p>You can just run <tt class="docutils literal"><span class="pre">relatex.py</span></tt> directly like this:</p>
+<div class="highlight-python"><div class="highlight"><pre>python /path/to/relatex.py plos my.tex
+</pre></div>
+</div>
+<ul>
+<li><p class="first">advantage: this way, it knows where its templates directory
+is (in the same place where <tt class="docutils literal"><span class="pre">relatex.py</span></tt> is), so you can
+specify a standard template just by giving its name, e.g. <tt class="docutils literal"><span class="pre">plos</span></tt>.</p>
+</li>
+<li><p class="first">disadvantage: ReLaTeX requires the Python
+<a class="reference external" href="http://jinja.pocoo.org">Jinja2</a> package.  You either have to
+have Jinja2 already installed, or install it yourself via your system&#8217;s
+software installer, or Python&#8217;s mechanisms such as <tt class="docutils literal"><span class="pre">easy_install</span></tt>
+and <tt class="docutils literal"><span class="pre">pip</span></tt>, e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre>sudo pip install Jinja2
+</pre></div>
+</div>
+</li>
+</ul>
+<p>(leave out <tt class="docutils literal"><span class="pre">sudo</span></tt> if you are installing to a location you have
+write privileges for).</p>
+</div>
+<div class="section" id="option-2-installing-relatex-py-into-your-system-libraries">
+<h3>Option 2: Installing relatex.py into your system libraries<a class="headerlink" href="#option-2-installing-relatex-py-into-your-system-libraries" title="Permalink to this headline">¶</a></h3>
+<p>In the downloaded <tt class="docutils literal"><span class="pre">relatex</span></tt> directory run:</p>
+<div class="highlight-python"><div class="highlight"><pre>sudo python setup.py install
+</pre></div>
+</div>
+<p>(leave out <tt class="docutils literal"><span class="pre">sudo</span></tt> if you are installing to a location you have
+write privileges for).</p>
+<ul>
+<li><p class="first">advantage: assuming your Python has
+<a class="reference external" href="http://pypi.python.org/pypi/setuptools">setuptools</a>,
+this will attempt to automatically install
+<a class="reference external" href="http://jinja.pocoo.org">Jinja2</a>
+for you, if it is not already installed.</p>
+</li>
+<li><p class="first">disadvantage: you will have to specify the path to your desired
+template file, e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre>relatex.py /path/to/relatex/templates/plos my.tex
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Installing ReLaTeX</a><ul>
+<li><a class="reference internal" href="#obtaining-relatex">Obtaining ReLaTeX</a></li>
+<li><a class="reference internal" href="#installation">Installation</a><ul>
+<li><a class="reference internal" href="#option-1-running-relatex-py-directly-no-install-step-required">Option 1: Running relatex.py directly (no install step required)</a></li>
+<li><a class="reference internal" href="#option-2-installing-relatex-py-into-your-system-libraries">Option 2: Installing relatex.py into your system libraries</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="tutorial.html"
+                        title="previous chapter">Basic ReLaTeX Tutorial</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="command.html"
+                        title="next chapter">ReLaTeX Command-line Options</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/install.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="command.html" title="ReLaTeX Command-line Options"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Basic ReLaTeX Tutorial"
+             >previous</a> |</li>
+        <li><a href="index.html">ReLaTeX 0.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Christopher Lee.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

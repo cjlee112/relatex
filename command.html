@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ReLaTeX Command-line Options &mdash; ReLaTeX 0.3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ReLaTeX 0.3 documentation" href="index.html" />
+    <link rel="next" title="Specifying Institutional Affiliations and Authorship Roles" href="affiliations.html" />
+    <link rel="prev" title="Installing ReLaTeX" href="install.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="affiliations.html" title="Specifying Institutional Affiliations and Authorship Roles"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="install.html" title="Installing ReLaTeX"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">ReLaTeX 0.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="relatex-command-line-options">
+<h1>ReLaTeX Command-line Options<a class="headerlink" href="#relatex-command-line-options" title="Permalink to this headline">¶</a></h1>
+<p>ReLaTeX requires two command-line arguments:</p>
+<div class="highlight-python"><div class="highlight"><pre>relatex.py TEMPLATE INPUT-PATH [OPTIONS]
+</pre></div>
+</div>
+<ul class="simple">
+<li><strong>template</strong>: This should be either<ul>
+<li>the name of a directory inside the <tt class="docutils literal"><span class="pre">relatex/templates</span></tt>
+directory, e.g. <tt class="docutils literal"><span class="pre">plos</span></tt>.  This only works if you
+are running <tt class="docutils literal"><span class="pre">relatex.py</span></tt> directly from the <tt class="docutils literal"><span class="pre">relatex</span></tt>
+source directory.</li>
+<li>the path to your desired template file,
+e.g. <tt class="docutils literal"><span class="pre">/path/to/templates/plos/template.tex</span></tt>.
+In this case, the name of the directory in which the
+file is located (<tt class="docutils literal"><span class="pre">plos</span></tt>) will be taken as the
+template name.</li>
+<li>the path to your desired template directory, e.g.
+<tt class="docutils literal"><span class="pre">/path/to/templates/plos</span></tt>, which must contain
+a <tt class="docutils literal"><span class="pre">templates.tex</span></tt> template file.</li>
+</ul>
+</li>
+<li><strong>input latex file path</strong>: path to the LaTeX file to read.</li>
+</ul>
+<p>Note: by default ReLaTeX writes its output latex file to
+the current directory, with the
+template name appended to its file prefix, i.e. running
+the <tt class="docutils literal"><span class="pre">pnas</span></tt> template on a <tt class="docutils literal"><span class="pre">test.tex</span></tt>
+input file will generate a <tt class="docutils literal"><span class="pre">test_pnas.tex</span></tt> output file.</p>
+<p>Note that ReLaTeX also looks for an <tt class="docutils literal"><span class="pre">affiliations.txt</span></tt>
+<em>affiliations</em> file in the current directory.  For more
+info see <a class="reference internal" href="affiliations.html"><em>Specifying Institutional Affiliations and Authorship Roles</em></a>.</p>
+<p>In addition, it accepts the following options:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">--extract-tables</span></tt>: some templates (e.g. PLOS) require
+moving all the tables to the end of the paper.  Using
+this option extract all tables from the main text,
+and allows the template to insert them at the end of the paper.</li>
+<li><tt class="docutils literal"><span class="pre">--extract-figures</span></tt>: some templates (e.g. PLOS) require
+moving all the figures to the end of the paper.  Using
+this option extract all figures from the main text,
+and allows the template to insert them at the end of the paper.</li>
+<li><tt class="docutils literal"><span class="pre">--bbl</span> <span class="pre">BBL-PATH</span></tt>: some templates (e.g. PNAS) require
+directly inserting the bibliography into the latex file
+(rather than providing a separate <tt class="docutils literal"><span class="pre">.bib</span></tt> bibliography database).
+ReLaTeX will do this automatically for you if you provide
+the path to a <tt class="docutils literal"><span class="pre">.bbl</span></tt> file for your input paper (this is
+generated automatically when you run <tt class="docutils literal"><span class="pre">bibtex</span></tt> on your input paper).</li>
+<li><tt class="docutils literal"><span class="pre">--title</span> <span class="pre">&quot;My</span> <span class="pre">Amazing</span> <span class="pre">Paper</span> <span class="pre">Title&quot;</span></tt>: override the default
+title searching mechanism (which looks for <tt class="docutils literal"><span class="pre">\title{...}</span></tt>)
+by explicitly providing the paper title.</li>
+<li><tt class="docutils literal"><span class="pre">--authors</span> <span class="pre">&quot;Adam</span> <span class="pre">Smith,Karl</span> <span class="pre">Marx,Charles</span> <span class="pre">Darwin&quot;</span></tt>: override the default
+author searching mechanism (which looks for <tt class="docutils literal"><span class="pre">\author{...}</span></tt>)
+by explicitly providing the paper authors as a comma-separated string.</li>
+<li><tt class="docutils literal"><span class="pre">--email</span> <span class="pre">ADDRESS</span></tt>: provide an email address for the corresponding
+author, used by some templates.</li>
+<li><tt class="docutils literal"><span class="pre">--no-extra-files</span></tt>: by default, ReLaTeX copies additional
+files required by your template (e.g. <tt class="docutils literal"><span class="pre">.cls</span></tt> and <tt class="docutils literal"><span class="pre">.sty</span></tt> files)
+into the directory containing your output file, since
+running latex on the output latex file will require these
+files.  You can turn off this behavior with this flag.</li>
+<li><tt class="docutils literal"><span class="pre">--no-subsection-numbers</span></tt>: some templates (e.g. PLoS)
+require that section numbering be turned off for subsections.
+You can do so using this flag.</li>
+<li><tt class="docutils literal"><span class="pre">--rename</span> <span class="pre">OLDNAME:NEWNAME</span></tt>: you can rename one or more
+sections in your original
+document to the names expected by the journal, by specifying a
+current section name as OLDNAME, and the name expected by the
+journal as NEWNAME.</li>
+<li><tt class="docutils literal"><span class="pre">--imageoptions</span> <span class="pre">IMAGEOPTIONS</span></tt>: forces <tt class="docutils literal"><span class="pre">\includegraphics</span></tt>
+to use IMAGEOPTIONS as its optional arguments, i.e. in the
+form <tt class="docutils literal"><span class="pre">\includegraphics[IMAGEOPTIONS]</span></tt>.</li>
+<li><tt class="docutils literal"><span class="pre">--merge-citations</span> <span class="pre">TAG</span></tt>: merges any string of
+<tt class="docutils literal"><span class="pre">\cite{CITE1}</span> <span class="pre">\cite{CITE2}...</span></tt>
+to be combined in a single expression of the form
+<tt class="docutils literal"><span class="pre">TAG{CITE1,CITE2...}</span></tt>.</li>
+<li><tt class="docutils literal"><span class="pre">--keep-hrefs</span></tt>: forces relatex to preserve <tt class="docutils literal"><span class="pre">\href{}</span></tt>
+links; by default it strips them, since many journal templates
+do not allow them.</li>
+<li><tt class="docutils literal"><span class="pre">--replace</span> <span class="pre">:PATTERN:SUB</span></tt>: perform global substitution of
+the regular expression <tt class="docutils literal"><span class="pre">PATTERN</span></tt> to replace it with the
+regular expression <tt class="docutils literal"><span class="pre">SUB</span></tt>; you can use subgroup values in
+<tt class="docutils literal"><span class="pre">SUB</span></tt> such as <tt class="docutils literal"><span class="pre">\1,\2</span></tt> etc.  Note that you can specify any
+separator character you want as the first character of the
+argument string; in the example above it is given as :
+(i.e. a colon).</li>
+<li><tt class="docutils literal"><span class="pre">--param</span> <span class="pre">KEY=VALUE</span></tt>: pass the specified keyword arguments
+to the Jinja2 template, to use as it desires.</li>
+</ul>
+<p>An example:</p>
+<div class="highlight-python"><div class="highlight"><pre>python /path/to/relatex.py bioinformatics mypaper.tex --email leec@chem.ucla.edu --merge-citations &#39;\citep&#39; --keep-hrefs --imgoptions &#39;width=9cm&#39; --replace &#39;:\\cite\{:\citep{&#39; --replace &#39;:\\code\{([^}]+)\}:\1&#39; --param shortTitle=Phenoseq --param fundingText=&#39;DOE grant DE-FC02-02ER63421&#39; --param shortAuthors=&#39;Lee \&amp; Harper&#39;
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="install.html"
+                        title="previous chapter">Installing ReLaTeX</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="affiliations.html"
+                        title="next chapter">Specifying Institutional Affiliations and Authorship Roles</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/command.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="affiliations.html" title="Specifying Institutional Affiliations and Authorship Roles"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="install.html" title="Installing ReLaTeX"
+             >previous</a> |</li>
+        <li><a href="index.html">ReLaTeX 0.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Christopher Lee.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

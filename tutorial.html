@@ -1,0 +1,284 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Basic ReLaTeX Tutorial &mdash; ReLaTeX 0.3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ReLaTeX 0.3 documentation" href="index.html" />
+    <link rel="next" title="Installing ReLaTeX" href="install.html" />
+    <link rel="prev" title="Welcome to ReLaTeX’s documentation!" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="install.html" title="Installing ReLaTeX"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to ReLaTeX’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">ReLaTeX 0.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="basic-relatex-tutorial">
+<h1>Basic ReLaTeX Tutorial<a class="headerlink" href="#basic-relatex-tutorial" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="a-gallery-of-examples-of-re-templating-a-paper">
+<h2>A Gallery of Examples of Re-Templating a Paper<a class="headerlink" href="#a-gallery-of-examples-of-re-templating-a-paper" title="Permalink to this headline">¶</a></h2>
+<p>ReLaTeX takes text from your input latex file and &#8220;injects&#8221;
+it into a latex template e.g. a standard latex template for
+submitting to a specific scientific journal.  To illustrate,
+here&#8217;s one paper that I&#8217;ve injected into a series of different
+templates using ReLaTeX,
+going all the way from reStructured Text to latex
+templates for different journals:</p>
+<ul class="simple">
+<li>I actually wrote the paper in
+<a class="reference external" href="http://sphinx.pocoo.org/rest.html">reStructured Text</a>,
+which can be cross-compiled to latex, HTML, or other formats
+using <a class="reference external" href="http://sphinx.pocoo.org">Sphinx</a> / Docutils.  Here&#8217;s the
+<a class="reference external" href="http://people.mbi.ucla.edu/leec/pubs/multihit.txt">original file</a>.</li>
+<li>I stored my references in a BibTex bibliography file
+<a class="reference external" href="http://people.mbi.ucla.edu/leec/pubs/multihit.bib">multihit.bib</a>
+(this file is a generic database, so it
+contains a lot more references than just the ones for this
+paper).</li>
+<li>minor note: Sphinx can produce an
+<a class="reference external" href="http://people.mbi.ucla.edu/leec/pubs/multihit_sphinx/multihit.html">HTML version</a>
+of the paper, including
+equations (thanks to
+<a class="reference external" href="http://www.math.union.edu/~dpvc/jsMath/">jsMath</a>),
+figures, and references (thanks to Marc Harper&#8217;s
+<a class="reference external" href="http://citation.marcallenharper.com">citation server</a>).
+This is not really relevant to ReLaTeX, but it has its uses
+(e.g. I run Sphinx on my iPad in order to edit / view papers
+directly on the iPad using its built-in web browser).</li>
+<li>Sphinx can also compile this to a latex file.  Here is the
+<a class="reference external" href="http://people.mbi.ucla.edu/leec/pubs/multihit.tex.txt">latex file</a>
+that Sphinx generated, and the resulting
+<a class="reference external" href="http://people.mbi.ucla.edu/leec/pubs/multihit.pdf">PDF output</a>.
+As you can see, this is useful, but it produces latex code that
+is a bit non-standard (e.g. its use of the <strong>gather</strong> and <strong>split</strong>
+environments for equations).  This wouldn&#8217;t be suitable for
+submission to a journal, since they usually require you
+to submit latex that follows their template exactly.</li>
+<li>I then used ReLaTeX to inject this latex content into the
+PLoS latex template.  PLoS requires the use of this template
+for submitting a paper for production by their journals. Here is
+<a class="reference external" href="http://people.mbi.ucla.edu/leec/pubs/test_plos.tex.txt">the resulting latex</a>
+and the <a class="reference external" href="http://people.mbi.ucla.edu/leec/pubs/test_plos.pdf">PDF</a>
+it produces. Note that this pushes the tables and figures to
+the end of the output, as required by PLoS&#8217; template.</li>
+<li>Here is the
+<a class="reference external" href="http://people.mbi.ucla.edu/leec/pubs/Harper2011.pdf">production PDF</a>
+that PLoS generated from ReLaTeX&#8217;s output tex file.</li>
+<li>To show that it&#8217;s easy to inject the paper into another template,
+here is example output using the PNAS production template
+(note that this doesn&#8217;t include figures, since they are submitted
+as separate files for production):
+<a class="reference external" href="http://people.mbi.ucla.edu/leec/pubs/test_pnas.tex.txt">the latex file</a>
+and the <a class="reference external" href="http://people.mbi.ucla.edu/leec/pubs/test_pnas.pdf">PDF</a>.</li>
+</ul>
+<p>Of course, this is more complicated than the typical case
+where you just have a latex file and want to inject it into a single
+template.  Here are a couple examples showing how easy it is to
+do that with ReLaTeX.</p>
+</div>
+<div class="section" id="a-simple-document">
+<h2>A Simple Document<a class="headerlink" href="#a-simple-document" title="Permalink to this headline">¶</a></h2>
+<p>Directory <tt class="docutils literal"><span class="pre">example1</span></tt> contains a very simple Latex document for
+testing different journal templates.  You can test it as follows
+on the PLoS template
+(the <tt class="docutils literal"><span class="pre">--email</span></tt> option gives the corresponding author&#8217;s
+email address, required by PLoS):</p>
+<div class="highlight-python"><div class="highlight"><pre>cd example1
+python ../relatex.py plos simple.tex --email yogi@cs.technion.ac.il --extract-figures
+</pre></div>
+</div>
+<p>This inserts the document&#8217;s contents into the PLoS template, and
+outputs it as <tt class="docutils literal"><span class="pre">simple_plos.tex</span></tt>.  You can now generate a PDF in the
+usual way, e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre>pdflatex simple_plos.tex
+bibtex simple_plos
+pdflatex simple_plos.tex
+pdflatex simple_plos.tex
+</pre></div>
+</div>
+</div>
+<div class="section" id="a-real-paper">
+<h2>A Real Paper<a class="headerlink" href="#a-real-paper" title="Permalink to this headline">¶</a></h2>
+<p>Directory <tt class="docutils literal"><span class="pre">example2</span></tt> contains a full paper, generated from
+reStructured Text by the Python Sphinx package.  We can test
+inserting it into the PNAS and PLoS templates as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre>cd example2
+python ../relatex.py pnas test.tex --bbl multihit.bbl --extract-figures --extract-tables
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">--bbl</span></tt> option informs relatex of a <tt class="docutils literal"><span class="pre">.bbl</span></tt> bibliography file
+that the PNAS template requires (PNAS requires that the bibliography
+actually be inserted into the latex document itself; relatex
+does this for you).</p>
+<p>For PLoS:</p>
+<div class="highlight-python"><div class="highlight"><pre>python ../relatex.py plos test.tex --no-subsection-numbers --email leec@chem.ucla.edu --extract-figures --extract-tables
+</pre></div>
+</div>
+<p>PLoS requires the removal of subsection numbering, and also
+an email address for the corresponding author; the command-line options
+above provide this information.</p>
+<p>You then generate PDFs from the resulting <tt class="docutils literal"><span class="pre">test_pnas.tex</span></tt> and
+<tt class="docutils literal"><span class="pre">test_plos.tex</span></tt> output files as usual.</p>
+</div>
+<div class="section" id="using-relatex-with-sphinx">
+<h2>Using ReLaTeX with Sphinx<a class="headerlink" href="#using-relatex-with-sphinx" title="Permalink to this headline">¶</a></h2>
+<p>Sphinx configuration: to handle <tt class="docutils literal"><span class="pre">cite</span></tt> and <tt class="docutils literal"><span class="pre">bibliography</span></tt>
+reStructured text commands properly
+(generating latex <tt class="docutils literal"><span class="pre">\cite</span></tt> and <tt class="docutils literal"><span class="pre">\bibliography</span></tt> output),
+you must use the <tt class="docutils literal"><span class="pre">bibcite</span></tt> Sphinx extension, which you can
+obtain from <a class="reference external" href="https://bitbucket.org/foobaron/bibcite">https://bitbucket.org/foobaron/bibcite</a>.</p>
+<ul>
+<li><p class="first">install (or link) <tt class="docutils literal"><span class="pre">bibcite.py</span></tt> in your <tt class="docutils literal"><span class="pre">sphinx-ext</span></tt> directory.</p>
+</li>
+<li><p class="first">edit your Sphinx <tt class="docutils literal"><span class="pre">conf.py</span></tt> config file to
+ensure that <tt class="docutils literal"><span class="pre">sphinx-ext</span></tt> is added to the Python path,
+and that <tt class="docutils literal"><span class="pre">bibcite</span></tt> is added to Sphinx&#8217;s imports, e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># If extensions (or modules to document with autodoc) are in another directory,</span>
+<span class="c"># add these directories to sys.path here. If the directory is relative to the</span>
+<span class="c"># documentation root, use os.path.abspath to make it absolute, like shown here.</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;sphinx-ext&#39;</span><span class="p">))</span>
+
+<span class="c"># -- General configuration -----------------------------------------------------</span>
+
+<span class="c"># Add any Sphinx extension module names here, as strings. They can be extensions</span>
+<span class="c"># coming with Sphinx (named &#39;sphinx.ext.*&#39;) or your custom ones.</span>
+<span class="n">extensions</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;sphinx.ext.jsmath&#39;</span><span class="p">,</span> <span class="s">&#39;bibcite&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>We recommend you use the <tt class="docutils literal"><span class="pre">howto</span></tt> Sphinx document style
+(instead of the <tt class="docutils literal"><span class="pre">manual</span></tt> style, which is more appropriate
+for a book format rather than an article format).</p>
+<p>If you don&#8217;t specify an input file path,
+ReLaTeX will look automatically in your <tt class="docutils literal"><span class="pre">_build/latex</span></tt>
+directory (where Sphinx writes its latex file).  So you
+can run ReLaTeX by just specifying the template name:</p>
+<div class="highlight-python"><div class="highlight"><pre>make latex
+relatex.py pnas --bbl my.bbl --extract-figures --extract-tables
+</pre></div>
+</div>
+<p>ReLaTeX will write its output in the same directory as the input.</p>
+</div>
+<div class="section" id="relatexing-a-paper-for-arxiv">
+<h2>ReLaTeXing a paper for arXiv<a class="headerlink" href="#relatexing-a-paper-for-arxiv" title="Permalink to this headline">¶</a></h2>
+<p>arXiv requires that papers written in LaTeX be submitted as
+tex files rather than as PDF.  Unfortunately, if your tex file
+doesn&#8217;t fit arXiv&#8217;s expectations, it will be rejected.
+For example, tex files generated by Sphinx require special
+packages provided by Sphinx, so arXiv will not accept them,
+because arXiv&#8217;s automatic PDF creation process will fail.
+You can solve this problem by ReLaTeXing your tex file to a
+generic tex format (with no odd package requirements) that
+arXiv will accept:</p>
+<div class="highlight-python"><div class="highlight"><pre>python /path/to/relatex.py generic paper.tex --email you@biguniversity.edu
+</pre></div>
+</div>
+<p>This produces <tt class="docutils literal"><span class="pre">paper_generic.tex</span></tt>, which you can upload to arXiv.
+(You can also <tt class="docutils literal"><span class="pre">pdflatex</span></tt> and <tt class="docutils literal"><span class="pre">bibtex</span></tt> it in the usual way).</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Basic ReLaTeX Tutorial</a><ul>
+<li><a class="reference internal" href="#a-gallery-of-examples-of-re-templating-a-paper">A Gallery of Examples of Re-Templating a Paper</a></li>
+<li><a class="reference internal" href="#a-simple-document">A Simple Document</a></li>
+<li><a class="reference internal" href="#a-real-paper">A Real Paper</a></li>
+<li><a class="reference internal" href="#using-relatex-with-sphinx">Using ReLaTeX with Sphinx</a></li>
+<li><a class="reference internal" href="#relatexing-a-paper-for-arxiv">ReLaTeXing a paper for arXiv</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to ReLaTeX&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="install.html"
+                        title="next chapter">Installing ReLaTeX</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/tutorial.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="install.html" title="Installing ReLaTeX"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to ReLaTeX’s documentation!"
+             >previous</a> |</li>
+        <li><a href="index.html">ReLaTeX 0.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Christopher Lee.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>
