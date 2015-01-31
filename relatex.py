@@ -61,7 +61,7 @@ def save_figure(t, imageOnly=False, label=None, options=None):
 def extract_macros(t, start='%BEGINMACROS', end='%ENDMACROS'):
     'get macros from latex for optional insertion into template'
     try:
-        i = t.index(start)
+        i = t.index(start) + len(start)
     except ValueError:
         return ''
     j = t.index(end, i)
@@ -384,13 +384,52 @@ def read_affiliations(filename, authors):
         ifile.close()
     return l
 
+
+def prepare_insertions(figures, insertions, template, attr='figure'):
+    'apply template to individual figures so we can later insert them'
+    l = []
+    for i, txt in enumerate(insertions):
+        if txt != 'SKIP':
+            l.append((txt, template.render(**{attr:figures[i]})))
+    return l
+
+def perform_insertions(txt, inserts):
+    'insert the inserts at the specified string markers in txt'
+    l = []
+    for s,v in inserts: # first find the insertion points
+        l.append((txt.index(s), v))
+    l.sort()
+    lastpos = 0
+    out = ''
+    for i,v in l: # now perform the insertions from first to last
+        out += txt[lastpos:i] + '\n\n' + v + '\n\n'
+        lastpos = i
+    out += txt[lastpos:]
+    return out
+    
+
 def template_fmt(template, title, authors, affiliations,
-                 bibname, section, tables, figures, **kwargs):
+                 bibname, section, tables, figures,
+                 figureInsertions=None, tableInsertions=None,
+                 figureTemplate=None, tableTemplate=None,
+                 **kwargs):
     'insert our paper sections into the latex template'
-    return template.render(title=title, authors=authors,
+    inserts = []
+    if figureInsertions:
+        inserts += prepare_insertions(figures, figureInsertions, figureTemplate)
+        figures = []
+    if tableInsertions:
+        inserts += prepare_insertions(tables, tableInsertions, tableTemplate,
+                                      'table')
+        tables = []
+    out = template.render(title=title, authors=authors,
                            affiliations=affiliations, section=section,
                            bibname=bibname, figures=figures, tables=tables,
                            len=len, **kwargs)
+    if inserts:
+        return perform_insertions(out, inserts)
+    else:
+        return out
 
 def copy_template_files(templatepath, outpath):
     'copy additional template files to same directory as the output'
@@ -410,15 +449,24 @@ def reformat_file(paperpath, outpath='out.tex',
                   sectionRenames=(), imgoptions=None,
                   rmTables=False, rmFigures=False,
                   mergeCitations=False,
-                  removeHREFs=True,
+                  removeHREFs=True, figureInsertions=None, tableInsertions=None,
                   resubs=(), title=None, authors=None, **kwargs):
     'do everything to reformat an input tex file into latex template'
     ifile = codecs.open(paperpath, encoding='utf-8') # read source latex from sphinx
     latex = ifile.read()
     ifile.close()
     ifile = open(templatepath) # read latex template
-    template = Template(ifile.read())
+    templateText = ifile.read()
+    template = Template(templateText)
     ifile.close()
+
+    figureTemplate = tableTemplate = None # default
+    if figureInsertions: # get template for a figure
+        figureTemplate = Template(extract_macros(templateText,
+                            '%START-FIGURE-FORMAT', '%END-FIGURE-FORMAT'))
+    if tableInsertions: # get template for a table
+        tableTemplate = Template(extract_macros(templateText,
+                            '%START-TABLE-FORMAT', '%END-TABLE-FORMAT'))
 
     macroDefs = extract_macros(latex)
     if not title: # extract relevant sections from sphinx
@@ -461,6 +509,8 @@ def reformat_file(paperpath, outpath='out.tex',
     ifile = codecs.open(outpath, 'w', 'utf-8') # output text inserted into template
     ifile.write(template_fmt(template, title, authors, affiliations,
                              bibname, section, tables, figures,
+                             figureInsertions, tableInsertions,
+                             figureTemplate, tableTemplate,
                              macroDefs=macroDefs, **kwargs))
     ifile.close()
     if copyExtraFiles: # copy extra template files to output directory
@@ -559,6 +609,14 @@ def get_options():
         '--use-packages', action="store", type="string",
         dest="packages", default='',
         help="comma-separated list of packages to add to template")
+    parser.add_option(
+        '--figure-insertions', action="store", type="string",
+        dest="figureInsertions", default=None,
+        help="path to file listing figure insertion points as strings")
+    parser.add_option(
+        '--table-insertions', action="store", type="string",
+        dest="tableInsertions", default=None,
+        help="path to file listing table insertion points as strings")
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -577,6 +635,12 @@ if __name__ == '__main__':
         bbl = bibCount = None
     kwargs = {}
     packages = options.packages.split(',')
+    if options.figureInsertions: # read figure insertion points
+        with open(options.figureInsertions, 'rU') as ifile:
+            kwargs['figureInsertions'] = [s.strip() for s in ifile]
+    if options.tableInsertions: # read table insertion points
+        with open(options.tableInsertions, 'rU') as ifile:
+            kwargs['tableInsertions'] = [s.strip() for s in ifile]
     if options.params: # build kwargs dict
         for s in options.params:
             k = s.split('=')[0]
