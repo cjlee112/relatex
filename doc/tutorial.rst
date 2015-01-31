@@ -108,7 +108,19 @@ that the PNAS template requires (PNAS requires that the bibliography
 actually be inserted into the latex document itself; relatex
 does this for you).
 
-For PLoS::
+An example of using the 2015 PLoS template::
+
+  python ~/projects/relatex/relatex.py plos ip_pg.tex --no-subsection-numbers --email leec@chem.ucla.edu --bbl ip_pg.bbl --extract-tables --table-insertions table_insertions.txt --use-packages xspace
+
+* ``--use-packages`` specifies packages that need to be added to the PLOS
+  template for your paper to compile.
+* ``--table-insertions`` specifies a text file that indicates where each
+  table should be re-inserted in the final manuscript.  Each line in
+  the file gives a text string in the paper where you want each of
+  the figures to be inserted (the figure is inserted immediately before
+  the location where the text string is found).
+
+For 2009 PLoS template::
 
   python ../relatex.py plos test.tex --no-subsection-numbers --email leec@chem.ucla.edu --extract-figures --extract-tables
 
