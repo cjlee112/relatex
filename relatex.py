@@ -27,6 +27,23 @@ class Figure(object):
         self.options = options
         self.label = label
 
+def get_caption(t, endmarker='}%ENDCAPTION'):
+    tag = r'\caption{'
+    i = t.index(tag) + len(tag)
+    tag = endmarker
+    j = t.find(tag, i)
+    if j < 0: # try sphinx caption closing pattern
+        tag = r'}{\small'
+        j = t.find(tag, i)
+    if j < 0: # search for closing brace
+        print '''falling back to weak } caption closure method -- Suggest you mark end of
+caption with %ENDCAPTION immediately after caption closing }'''
+        tag = '}'
+        j = t.index(tag, i)
+    caption = t[i:j]
+    return caption, j + len(tag)
+    
+        
 def save_figure(t, imageOnly=False, label=None, options=None):
     m = re.search(r'\\includegraphics([^{]*){([^}]+)', t)
     if not options:
@@ -34,18 +51,11 @@ def save_figure(t, imageOnly=False, label=None, options=None):
     imagefile = m.group(2)
     if imageOnly:
         return Figure(imagefile, '', '', options)
-    tag = r'\caption{'
-    i = t.index(tag) + len(tag)
-    tag = r'}{\small'
-    j = t.find(tag)
-    if j < 0: # search for closing brace
-        tag = '}'
-        j = i + t[i:].index(tag)
-    caption = t[i:j]
-    k = t.index(r'\end{figure}')
+    caption, textStart = get_caption(t)
+    k = t.index(r'\end{figure}', textStart)
     if t[k - 1] == '}': # catch }\end{figure} from sphinx
         k -= 1
-    legend = re.sub('\n\n', '\n', t[j + len(tag):k]) # caption cannot contain multiple paragraphs
+    legend = re.sub('\n\n', '\n', t[textStart:k]) # caption cannot contain multiple paragraphs
     return Figure(imagefile, caption, legend, options, label)
 
 def extract_macros(t, start='%BEGINMACROS', end='%ENDMACROS'):
@@ -101,17 +111,20 @@ def cleanup_tables(t):
     return t
 
 class Table(object):
-    def __init__(self, tabular, columnFormats, caption, legend=''):
+    def __init__(self, tabular, columnFormats, caption, legend='', label=''):
         self.tabular = tabular
         self.columnFormats = columnFormats
         self.caption = caption
         self.legend = legend
+        self.label = label
 
 def extract_tables(t):
     'extract tables from main text, return text and tables separately'
     lastpos = 0
     endTag = r'\end{table}'
     tabularTag = r'\begin{tabular}{'
+    tabularEnd = r'\end{tabular}'
+    labelTag = r'\label'
     s = ''
     tables = []
     while True:
@@ -122,13 +135,19 @@ def extract_tables(t):
         s += t[lastpos:lastpos + i]
         j = t[lastpos + i:].index(endTag) + len(endTag)
         tableStr = t[lastpos + i:lastpos + i + j]
-        caption = re.search(r'\\caption\{([^}]+)', tableStr).group(1)
+        caption = get_caption(tableStr)[0]
         k = tableStr.index(tabularTag) + len(tabularTag)
         l = tableStr[k:].index('}')
         columnFormats = tableStr[k:k + l]
-        m = tableStr[k:].index(r'\end{tabular}')
-        tables.append(Table(tableStr[k + l + 1:k + m], columnFormats,
-                            caption))
+        m = tableStr.index(tabularEnd, k)
+        tabularText = tableStr[k + l + 1:m]
+        labelStart = tableStr.find(labelTag, m)
+        if labelStart > 0:
+            legend = tableStr[m + len(tabularEnd):labelStart].strip()
+            label = re.search(r'\label\{([^}]+)', tableStr).group(1)
+        else:
+            legend = label = ''
+        tables.append(Table(tabularText, columnFormats, caption, legend, label))
         lastpos += i + j
     s += t[lastpos:]
     return s, tables
@@ -536,6 +555,10 @@ def get_options():
         '--authors', action="store", type="string",
         dest="authors", default=None,
         help="comma-separated author list")
+    parser.add_option(
+        '--use-packages', action="store", type="string",
+        dest="packages", default='',
+        help="comma-separated list of packages to add to template")
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -553,6 +576,7 @@ if __name__ == '__main__':
     else:
         bbl = bibCount = None
     kwargs = {}
+    packages = options.packages.split(',')
     if options.params: # build kwargs dict
         for s in options.params:
             k = s.split('=')[0]
@@ -572,4 +596,4 @@ if __name__ == '__main__':
                   removeHREFs=options.removeHREFs,
                   resubs=options.resubs, 
                   title=options.title, 
-                  authors=options.authors, *args, **kwargs)
+                  authors=options.authors, packages=packages, *args, **kwargs)
